@@ -4,6 +4,7 @@ import com.locationjoystick.core.data.CooldownState
 import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.FavoriteLocation
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.MockLocationState
 import com.locationjoystick.core.model.MockMode
 import com.locationjoystick.core.model.RecentSearch
@@ -38,6 +39,7 @@ data class MapSharedState(
     val jitterRadiusMeters: Double = 0.0,
     val debugStatsEnabled: Boolean = false,
     val isRoadRouteFetchInFlight: Boolean = false,
+    val mapTileSource: MapTileSource = MapTileSource.OSM,
 )
 
 val MapSharedState.walkTarget: LatLng? get() = (walkMode as? WalkMode.Walking)?.target

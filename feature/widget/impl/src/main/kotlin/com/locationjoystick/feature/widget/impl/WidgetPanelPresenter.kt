@@ -292,6 +292,7 @@ internal class WidgetPanelPresenter(
                 quickWalk = quickWalk,
                 hideTeleportFeatures = hideTeleportFeatures,
                 showRouteJumpButtons = showRouteJumpButtons,
+                mapTileSource = shared.mapTileSource,
             )
         }
     }

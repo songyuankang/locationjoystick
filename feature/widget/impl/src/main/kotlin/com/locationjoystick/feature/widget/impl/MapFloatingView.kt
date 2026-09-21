@@ -45,6 +45,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.toGcj02
+import com.locationjoystick.core.common.util.toWgs84
 import com.locationjoystick.core.data.CooldownState
 import com.locationjoystick.core.designsystem.LjBg
 import com.locationjoystick.core.designsystem.LjIcons
@@ -69,6 +71,7 @@ import com.locationjoystick.core.map.maplibre.addLocationLayers
 import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.FavoriteLocation
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.MockLocationState
 import com.locationjoystick.core.model.MockMode
 import com.locationjoystick.core.model.RecentSearch
@@ -86,6 +89,16 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.geometry.LatLng as MapLatLng
+
+private fun LatLng?.toRenderLatLng(isGeoq: Boolean): LatLng? {
+    if (this == null) return null
+    return if (isGeoq) this.toGcj02() else this
+}
+
+private fun List<LatLng>?.toRenderLatLngs(isGeoq: Boolean): List<LatLng>? {
+    if (this == null) return null
+    return if (isGeoq) this.map { it.toGcj02() } else this
+}
 
 @Composable
 internal fun MapFloatingView(
@@ -130,6 +143,7 @@ internal fun MapFloatingView(
     quickWalk: Boolean = false,
     hideTeleportFeatures: Boolean = false,
     showRouteJumpButtons: Boolean = false,
+    mapTileSource: MapTileSource = MapTileSource.OSM,
 ) {
     val isRoaming = mockMode == MockMode.ROAMING
     val isRouteReplay = mockMode == MockMode.ROUTE_REPLAY
@@ -196,6 +210,27 @@ internal fun MapFloatingView(
         }
     }
 
+    LaunchedEffect(mapTileSource) {
+        val map = mapRef.value ?: return@LaunchedEffect
+        map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
+            val layers =
+                style.addLocationLayers(
+                    osmSourceId = MapLibreSourceIds.PANEL_OSM,
+                    osmLayerId = MapLibreLayerIds.PANEL_OSM,
+                    lineWidth = 3f,
+                    tileSource = mapTileSource,
+                )
+            positionSource.value = layers.positionSource
+            tracedSource.value = layers.tracedSource
+            remainingSource.value = layers.remainingSource
+            endpointsSource.value = layers.endpointsSource
+            pendingTapSource.value = layers.pendingTapSource
+            val ephemeralSrcs = style.addEphemeralRouteLayers()
+            ephemeralRouteSource.value = ephemeralSrcs.routeSource
+            ephemeralEndpointsSource.value = ephemeralSrcs.endpointsSource
+        }
+    }
+
     // Dark backdrop (visual only — X button is the close mechanism, map touches must pass through)
     Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.7f)))
 
@@ -227,12 +262,13 @@ internal fun MapFloatingView(
                                 ).zoom(AppConstants.MapConstants.DEFAULT_ZOOM)
                                 .build()
 
-                        map.setStyle(Style.Builder().fromUri("asset://empty.json")) { style ->
+                        map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
                             val layers =
                                 style.addLocationLayers(
                                     osmSourceId = MapLibreSourceIds.PANEL_OSM,
                                     osmLayerId = MapLibreLayerIds.PANEL_OSM,
                                     lineWidth = 3f,
+                                    tileSource = mapTileSource,
                                 )
                             positionSource.value = layers.positionSource
                             tracedSource.value = layers.tracedSource
@@ -245,11 +281,13 @@ internal fun MapFloatingView(
                         }
 
                         map.addOnMapClickListener { latLng ->
-                            val pos = LatLng(latLng.latitude, latLng.longitude)
+                            val isGeoq = mapTileSource == MapTileSource.GEOQ
+                            val tappedGcj = LatLng(latLng.latitude, latLng.longitude)
+                            val wgsPos = if (isGeoq) tappedGcj.toWgs84() else tappedGcj
                             if (quickWalkState.value) {
-                                onWalkToState.value(pos)
+                                onWalkToState.value(wgsPos)
                             } else {
-                                pendingTap = pos
+                                pendingTap = wgsPos
                             }
                             true
                         }
@@ -269,26 +307,29 @@ internal fun MapFloatingView(
                 val endpointsSrc = endpointsSource.value ?: return@AndroidView
                 val ephemeralRouteSrc = ephemeralRouteSource.value ?: return@AndroidView
                 val ephemeralEndpointsSrc = ephemeralEndpointsSource.value ?: return@AndroidView
+                val isGeoq = mapTileSource == MapTileSource.GEOQ
                 val position = currentPosition
+                val renderPosition = position.toRenderLatLng(isGeoq)
 
-                src.setGeoJson(buildPositionGeoJson(position))
+                src.setGeoJson(buildPositionGeoJson(renderPosition))
 
-                val waypoints = routeWaypoints
-                val walkStartSnap = walkStart
-                val target = walkTarget
-                if (waypoints != null && position != null) {
-                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(waypoints, position)
+                val waypoints = routeWaypoints.toRenderLatLngs(isGeoq)
+                val walkStartSnap = walkStart.toRenderLatLng(isGeoq)
+                val target = walkTarget.toRenderLatLng(isGeoq)
+                if (waypoints != null && renderPosition != null) {
+                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(waypoints, renderPosition)
                     tracedSrc.setGeoJson(tracedGeoJson)
                     remainingSrc.setGeoJson(remainingGeoJson)
                     endpointsSrc.setGeoJson(buildPointsGeoJson(waypoints))
-                } else if (ephemeralWaypoints != null && position != null) {
-                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(ephemeralWaypoints, position)
+                } else if (ephemeralWaypoints != null && renderPosition != null) {
+                    val ephPoints = ephemeralWaypoints.toRenderLatLngs(isGeoq)!!
+                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(ephPoints, renderPosition)
                     tracedSrc.setGeoJson(tracedGeoJson)
                     remainingSrc.setGeoJson(remainingGeoJson)
-                    endpointsSrc.setGeoJson(buildPointsGeoJson(ephemeralWaypoints))
-                } else if (walkStartSnap != null && target != null && position != null) {
+                    endpointsSrc.setGeoJson(buildPointsGeoJson(ephPoints))
+                } else if (walkStartSnap != null && target != null && renderPosition != null) {
                     val walkPoints = listOf(walkStartSnap, target)
-                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(walkPoints, position)
+                    val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(walkPoints, renderPosition)
                     tracedSrc.setGeoJson(tracedGeoJson)
                     remainingSrc.setGeoJson(remainingGeoJson)
                     endpointsSrc.setGeoJson(buildPointsGeoJson(walkPoints))
@@ -302,11 +343,11 @@ internal fun MapFloatingView(
                 ephemeralRouteSrc.setGeoJson(emptyGeoJson())
                 ephemeralEndpointsSrc.setGeoJson(emptyGeoJson())
 
-                pendingTapSource.value?.setGeoJson(buildPositionGeoJson(pendingTap))
+                pendingTapSource.value?.setGeoJson(buildPositionGeoJson(pendingTap.toRenderLatLng(isGeoq)))
 
-                if (isFollowingCamera.value && position != null) {
+                if (isFollowingCamera.value && renderPosition != null) {
                     mapRef.value?.animateCamera(
-                        CameraUpdateFactory.newLatLng(MapLatLng(position.latitude, position.longitude)),
+                        CameraUpdateFactory.newLatLng(MapLatLng(renderPosition.latitude, renderPosition.longitude)),
                         500,
                     )
                 }

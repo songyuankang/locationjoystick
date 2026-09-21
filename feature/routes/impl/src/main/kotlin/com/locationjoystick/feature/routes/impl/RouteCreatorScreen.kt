@@ -38,6 +38,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.toGcj02
+import com.locationjoystick.core.common.util.toWgs84
 import com.locationjoystick.core.designsystem.LjIcons
 import com.locationjoystick.core.designsystem.UiConstants
 import com.locationjoystick.core.designsystem.component.FavoritesList
@@ -51,6 +53,7 @@ import com.locationjoystick.core.map.geojson.buildWaypointsGeoJson
 import com.locationjoystick.core.map.maplibre.addCreatorLayers
 import com.locationjoystick.core.model.FavoriteLocation
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.core.model.RouteType
 import com.locationjoystick.core.overlay.OverlayService
@@ -131,9 +134,12 @@ internal fun RouteCreatorScreen(
     onToggleSpoofing: () -> Unit = {},
     locationLabel: String? = null,
     bottomBar: @Composable () -> Unit = {},
+    viewModel: RouteCreatorViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val mapTileSource by viewModel.mapTileSource.collectAsStateWithLifecycle()
+    val isGeoq = mapTileSource == MapTileSource.GEOQ
 
     val mapView =
         remember {
@@ -280,20 +286,23 @@ internal fun RouteCreatorScreen(
                                     .build()
 
                             map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
+                                val renderInitial = initialPosition?.let { if (isGeoq) it.toGcj02() else it }
                                 val layers =
                                     style.addCreatorLayers(
-                                        currentPosGeoJson = initialPosition?.let { buildPositionGeoJson(it) },
+                                        currentPosGeoJson = renderInitial?.let { buildPositionGeoJson(it) },
+                                        tileSource = mapTileSource,
                                     )
                                 segmentsSource.value = layers.segmentsSource
                                 waypointsSource.value = layers.waypointsSource
                             }
 
                             map.addOnMapClickListener { latLng ->
-                                val position = LatLng(latLng.latitude, latLng.longitude)
+                                val tappedGcj = LatLng(latLng.latitude, latLng.longitude)
+                                val wgsPos = if (isGeoq) tappedGcj.toWgs84() else tappedGcj
                                 if (routeType == RouteType.TELEPORT) {
-                                    pendingWaitPrompt = position
+                                    pendingWaitPrompt = wgsPos
                                 } else {
-                                    onAddWaypoint(position, 0)
+                                    onAddWaypoint(wgsPos, 0)
                                 }
                                 true
                             }
@@ -303,9 +312,11 @@ internal fun RouteCreatorScreen(
                 update = { _ ->
                     val segSrc = segmentsSource.value ?: return@AndroidView
                     val wpSrc = waypointsSource.value ?: return@AndroidView
+                    val renderSegments = if (isGeoq) state.segments.map { seg -> seg.map { it.toGcj02() } } else state.segments
+                    val renderWaypoints = if (isGeoq) state.waypoints.map { it.toGcj02() } else state.waypoints
 
-                    segSrc.setGeoJson(buildSegmentsGeoJson(state.segments))
-                    wpSrc.setGeoJson(buildWaypointsGeoJson(state.waypoints))
+                    segSrc.setGeoJson(buildSegmentsGeoJson(renderSegments))
+                    wpSrc.setGeoJson(buildWaypointsGeoJson(renderWaypoints))
                 },
                 modifier = Modifier.fillMaxSize(),
             )

@@ -107,6 +107,7 @@ class MapController
             observeRecentSearches()
             observeRoamingDefaults()
             observeMapFabFeatures()
+            observeMapTileSource()
             observeModeCompletions()
             restoreLastLocationIfNeeded()
         }
@@ -264,6 +265,17 @@ class MapController
                     .distinctUntilChanged()
                     .collect { enabled ->
                         _sharedState.update { it.copy(enabledMapFeatures = enabled) }
+                    }
+            }
+        }
+
+        private fun observeMapTileSource() {
+            appScope.launch {
+                settingsRepository
+                    .getMapTileSource()
+                    .distinctUntilChanged()
+                    .collect { source ->
+                        _sharedState.update { it.copy(mapTileSource = source) }
                     }
             }
         }

@@ -29,10 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.toGcj02
+import com.locationjoystick.core.common.util.toWgs84
 import com.locationjoystick.core.designsystem.LjIcons
 import com.locationjoystick.core.designsystem.UiConstants
 import com.locationjoystick.core.designsystem.component.LjMapIconButton
@@ -41,6 +45,8 @@ import com.locationjoystick.core.designsystem.component.NominatimSearchBar
 import com.locationjoystick.core.location.rememberSpoofToggleState
 import com.locationjoystick.core.map.geojson.buildMarkerGeoJson
 import com.locationjoystick.core.map.maplibre.addPickerLayers
+import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.core.overlay.OverlayService
 import com.locationjoystick.feature.favorites.impl.R
@@ -96,6 +102,7 @@ internal fun MapPickerScreen(
     onLocationPicked: (name: String, lat: Double, lon: Double) -> Unit,
     onBack: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
+    viewModel: FavoritesViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -112,6 +119,8 @@ internal fun MapPickerScreen(
     var showSearchBar by remember { mutableStateOf(false) }
     var suggestedName by remember { mutableStateOf("") }
     val spoofToggle = rememberSpoofToggleState()
+    val mapTileSource by viewModel.mapTileSource.collectAsStateWithLifecycle()
+    val isGeoq = mapTileSource == MapTileSource.GEOQ
 
     val effectivePosition = { selectedPosition.value ?: initialPosition?.let { it.latitude to it.longitude } }
 
@@ -239,20 +248,24 @@ internal fun MapPickerScreen(
                                     .build()
 
                             map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
+                                val renderInitial = initialPosition?.let { if (isGeoq) it.toGcj02() else it }
                                 val layers =
                                     style.addPickerLayers(
                                         currentPosGeoJson =
-                                            initialPosition?.let {
+                                            renderInitial?.let {
                                                 buildMarkerGeoJson(it.latitude, it.longitude)
                                             },
+                                        tileSource = mapTileSource,
                                     )
                                 markerSource.value = layers.markerSource
                             }
 
                             map.addOnMapClickListener { latLng ->
-                                selectedPosition.value = latLng.latitude to latLng.longitude
+                                val clickedGcj = LatLng(latLng.latitude, latLng.longitude)
+                                val wgsPos = if (isGeoq) clickedGcj.toWgs84() else clickedGcj
+                                selectedPosition.value = wgsPos.latitude to wgsPos.longitude
                                 val src = markerSource.value ?: return@addOnMapClickListener true
-                                src.setGeoJson(buildMarkerGeoJson(latLng.latitude, latLng.longitude))
+                                src.setGeoJson(buildMarkerGeoJson(clickedGcj.latitude, clickedGcj.longitude))
                                 true
                             }
                         }
