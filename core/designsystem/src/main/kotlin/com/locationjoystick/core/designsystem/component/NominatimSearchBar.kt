@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.gcj02ToWgs84
 import com.locationjoystick.core.common.util.parseRawLatLng
 import com.locationjoystick.core.designsystem.LjSpacing
 import com.locationjoystick.core.designsystem.R
@@ -52,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -93,7 +95,10 @@ fun NominatimSearchBar(
         delay(AppConstants.NominatimConstants.SEARCH_DEBOUNCE_MS)
         isLoading = true
         withContext(Dispatchers.IO) {
-            var parsed = querySystemGeocoder(context, query)
+            var parsed = queryAmap(query)
+            if (parsed.isEmpty()) {
+                parsed = querySystemGeocoder(context, query)
+            }
             if (parsed.isEmpty()) {
                 parsed = queryNominatim(query)
                 if (parsed.isEmpty() && (query.contains("县") || query.contains("市") || query.contains("区"))) {
@@ -250,6 +255,59 @@ private data class NominatimResult(
     val lon: Double,
     val displayName: String,
 )
+
+private fun queryAmap(searchTerm: String): List<NominatimResult> {
+    return try {
+        val encoded = URLEncoder.encode(searchTerm, "UTF-8")
+        val key = "cfc8fa33f036d939984b414aaa1400bd"
+        val url = URL("https://restapi.amap.com/v3/place/text?keywords=$encoded&key=$key")
+        val conn = url.openConnection() as HttpURLConnection
+        conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
+        conn.connectTimeout = 5000
+        conn.readTimeout = 5000
+        try {
+            if (conn.responseCode == 200) {
+                val responseText = conn.inputStream.bufferedReader().readText()
+                val json = JSONObject(responseText)
+                if (json.optString("status") == "1") {
+                    val pois = json.optJSONArray("pois") ?: return emptyList()
+                    (0 until minOf(pois.length(), 5)).mapNotNull { i ->
+                        try {
+                            val poi = pois.getJSONObject(i)
+                            val name = poi.optString("name")
+                            val pname = poi.optString("pname")
+                            val cityname = poi.optString("cityname")
+                            val adname = poi.optString("adname")
+                            val address = poi.optString("address")
+                            val locationStr = poi.optString("location")
+                            if (locationStr.contains(",")) {
+                                val parts = locationStr.split(",")
+                                val gcjLon = parts[0].toDouble()
+                                val gcjLat = parts[1].toDouble()
+                                val wgs = gcj02ToWgs84(gcjLat, gcjLon)
+                                val regionParts = listOf(pname, cityname, adname, address).filter { it.isNotBlank() && it != "[]" }.distinct()
+                                val regionStr = regionParts.joinToString("")
+                                val title = if (regionStr.isNotBlank()) "$name ($regionStr)" else name
+                                NominatimResult(
+                                    lat = wgs.latitude,
+                                    lon = wgs.longitude,
+                                    displayName = title,
+                                )
+                            } else null
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                } else emptyList()
+            } else emptyList()
+        } finally {
+            conn.disconnect()
+        }
+    } catch (e: Exception) {
+        Log.e("NominatimSearchBar", "Amap search failed for $searchTerm", e)
+        emptyList()
+    }
+}
 
 private val NOMINATIM_MIRRORS =
     listOf(

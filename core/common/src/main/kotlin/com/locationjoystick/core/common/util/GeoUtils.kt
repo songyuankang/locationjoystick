@@ -3,6 +3,7 @@ package com.locationjoystick.core.common.util
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.model.LatLng
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -217,4 +218,49 @@ fun parseRawLatLng(query: String): LatLng? {
     val lon = match.groupValues[2].toDoubleOrNull() ?: return null
     if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
     return LatLng(lat, lon)
+}
+
+/**
+ * Converts GCJ-02 (Chinese Mars coordinates) to WGS-84 (GPS standard coordinates).
+ */
+fun gcj02ToWgs84(
+    gcjLat: Double,
+    gcjLon: Double,
+): LatLng {
+    val a = 6378245.0
+    val ee = 0.00669342162296594323
+
+    fun transformLat(
+        x: Double,
+        y: Double,
+    ): Double {
+        var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * sqrt(abs(x))
+        ret += (20.0 * sin(6.0 * x * PI) + 20.0 * sin(2.0 * x * PI)) * 2.0 / 3.0
+        ret += (20.0 * sin(y * PI) + 40.0 * sin(y / 3.0 * PI)) * 2.0 / 3.0
+        ret += (160.0 * sin(y / 12.0 * PI) + 320 * sin(y * PI / 30.0)) * 2.0 / 3.0
+        return ret
+    }
+
+    fun transformLon(
+        x: Double,
+        y: Double,
+    ): Double {
+        var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * sqrt(abs(x))
+        ret += (20.0 * sin(6.0 * x * PI) + 20.0 * sin(2.0 * x * PI)) * 2.0 / 3.0
+        ret += (20.0 * sin(x * PI) + 40.0 * sin(x / 3.0 * PI)) * 2.0 / 3.0
+        ret += (150.0 * sin(x / 12.0 * PI) + 300.0 * sin(x / 30.0 * PI)) * 2.0 / 3.0
+        return ret
+    }
+
+    val dLat = transformLat(gcjLon - 105.0, gcjLat - 35.0)
+    val dLon = transformLon(gcjLon - 105.0, gcjLat - 35.0)
+    val radLat = gcjLat / 180.0 * PI
+    var magic = sin(radLat)
+    magic = 1 - ee * magic * magic
+    val sqrtMagic = sqrt(magic)
+    val dLatFinal = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * PI)
+    val dLonFinal = (dLon * 180.0) / (a / sqrtMagic * cos(radLat) * PI)
+    val mgLat = gcjLat + dLatFinal
+    val mgLon = gcjLon + dLonFinal
+    return LatLng(gcjLat * 2 - mgLat, gcjLon * 2 - mgLon)
 }
