@@ -25,6 +25,7 @@
     <string name="search_bar_search_location">"Search location..."</string>
     <string name="search_bar_recent">"Recent"</string>
     <string name="search_bar_no_results_found">"No results found"</string>
+    <string name="search_bar_searching">"Searching..."</string>
     <string name="roaming_sheet_roaming">"Roaming"</string>
     <string name="roaming_sheet_view_on_map">"View on map"</string>
     <string name="roaming_sheet_radius_mi">"Radius (mi)"</string>

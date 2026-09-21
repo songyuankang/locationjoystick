@@ -14,10 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -85,43 +88,20 @@ fun NominatimSearchBar(
         delay(AppConstants.NominatimConstants.SEARCH_DEBOUNCE_MS)
         isLoading = true
         withContext(Dispatchers.IO) {
-            try {
-                val encoded = URLEncoder.encode(query, "UTF-8")
-                val url = URL("${AppConstants.NominatimConstants.SEARCH_URL}?q=$encoded&format=json&limit=5&accept-language=zh-CN,zh;q=0.9,en;q=0.8")
-                val conn = url.openConnection() as HttpURLConnection
-                conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
-                conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
-                conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
-                try {
-                    val responseText = conn.inputStream.bufferedReader().readText()
-                    val array = JSONArray(responseText)
-                    val parsed =
-                        (0 until minOf(array.length(), 5)).mapNotNull { i ->
-                            try {
-                                val obj = array.getJSONObject(i)
-                                NominatimResult(
-                                    lat = obj.getDouble("lat"),
-                                    lon = obj.getDouble("lon"),
-                                    displayName = obj.getString("display_name"),
-                                )
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }
-                    results = parsed
-                } finally {
-                    conn.disconnect()
+            var parsed = queryNominatim(query)
+            if (parsed.isEmpty() && (query.contains("县") || query.contains("市") || query.contains("区"))) {
+                val shortTerm = query.substringAfter("县").substringAfter("市").substringAfter("区").trim()
+                if (shortTerm.length >= 2) {
+                    parsed = queryNominatim(shortTerm)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Search failed", e)
-                results = emptyList()
             }
+            results = parsed
             isLoading = false
         }
     }
 
     val showRecent = query.isEmpty() && recentSearches.isNotEmpty()
-    val showResults = results.isNotEmpty() || (query.length >= 2 && !isLoading) || showRecent
+    val showResults = results.isNotEmpty() || (query.length >= 2) || showRecent
 
     Column(
         modifier =
@@ -140,6 +120,16 @@ fun NominatimSearchBar(
                     .background(MaterialTheme.colorScheme.surface),
             placeholder = { Text(stringResource(R.string.search_bar_search_location)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = {
+                        query = ""
+                        results = emptyList()
+                    }) {
+                        Icon(Icons.Default.Clear, contentDescription = null)
+                    }
+                }
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions =
@@ -158,7 +148,23 @@ fun NominatimSearchBar(
 
         if (showResults) {
             HorizontalDivider()
-            if (showRecent) {
+            if (isLoading && query.length >= 2) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = LjSpacing.md, vertical = 14.dp),
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.search_bar_searching),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else if (showRecent) {
                 Text(
                     text = stringResource(R.string.search_bar_recent),
                     style = MaterialTheme.typography.labelSmall,
@@ -236,3 +242,35 @@ private data class NominatimResult(
     val lon: Double,
     val displayName: String,
 )
+
+private fun queryNominatim(searchTerm: String): List<NominatimResult> {
+    return try {
+        val encoded = URLEncoder.encode(searchTerm, "UTF-8")
+        val url = URL("${AppConstants.NominatimConstants.SEARCH_URL}?q=$encoded&format=json&limit=5&accept-language=zh-CN,zh;q=0.9,en;q=0.8")
+        val conn = url.openConnection() as HttpURLConnection
+        conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
+        conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
+        conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
+        try {
+            val responseText = conn.inputStream.bufferedReader().readText()
+            val array = JSONArray(responseText)
+            (0 until minOf(array.length(), 5)).mapNotNull { i ->
+                try {
+                    val obj = array.getJSONObject(i)
+                    NominatimResult(
+                        lat = obj.getDouble("lat"),
+                        lon = obj.getDouble("lon"),
+                        displayName = obj.getString("display_name"),
+                    )
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        } finally {
+            conn.disconnect()
+        }
+    } catch (e: Exception) {
+        Log.e("NominatimSearchBar", "Search failed for $searchTerm", e)
+        emptyList()
+    }
+}
