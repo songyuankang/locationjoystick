@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.wgs84ToGcj02
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.Locale
 import javax.inject.Inject
 
 private const val TAG = "SpoofToggleViewModel"
@@ -58,7 +60,10 @@ class SpoofToggleViewModel
                         }
                     }.collect { pos ->
                         if (pos != null) {
-                            _locationLabel.value = reverseGeocode(pos.latitude, pos.longitude)
+                            val label = reverseGeocode(pos.latitude, pos.longitude)
+                            _locationLabel.value = label ?: String.format(Locale.US, "%.4f, %.4f", pos.latitude, pos.longitude)
+                        } else {
+                            _locationLabel.value = null
                         }
                     }
             }
@@ -73,32 +78,64 @@ class SpoofToggleViewModel
             lon: Double,
         ): String? =
             withContext(Dispatchers.IO) {
+                // Tier 1: Amap ReGeo API
                 try {
-                    val url = URL("${AppConstants.NominatimConstants.REVERSE_URL}?lat=$lat&lon=$lon&format=json")
+                    val gcj = wgs84ToGcj02(lat, lon)
+                    val key = "cfc8fa33f036d939984b414aaa1400bd"
+                    val url = URL("https://restapi.amap.com/v3/geocode/regeo?location=${gcj.longitude},${gcj.latitude}&key=$key")
                     val conn = url.openConnection() as HttpURLConnection
-                    conn.setRequestProperty("User-Agent", "locationjoystick/1.0")
-                    conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
-                    conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
+                    conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
+                    conn.connectTimeout = 3000
+                    conn.readTimeout = 3000
                     try {
-                        val json = JSONObject(conn.inputStream.bufferedReader().readText())
-                        val address = json.optJSONObject("address") ?: return@withContext null
-                        val locality =
-                            address.optString("city").takeIf { it.isNotEmpty() }
-                                ?: address.optString("town").takeIf { it.isNotEmpty() }
-                                ?: address.optString("village").takeIf { it.isNotEmpty() }
-                                ?: address.optString("municipality").takeIf { it.isNotEmpty() }
-                                ?: return@withContext null
-                        val country =
-                            address.optString("country").takeIf { it.isNotEmpty() }
-                                ?: return@withContext locality
-                        "$locality, $country"
+                        if (conn.responseCode == 200) {
+                            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+                            if (json.optString("status") == "1") {
+                                val regeo = json.optJSONObject("regeocode")
+                                val formatted = regeo?.optString("formatted_address")
+                                if (!formatted.isNullOrEmpty() && formatted != "[]") {
+                                    return@withContext formatted
+                                }
+                            }
+                        }
                     } finally {
                         conn.disconnect()
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Reverse geocode failed", e)
-                    null
+                    Log.e(TAG, "Amap reverse geocode failed", e)
                 }
+
+                // Tier 2: Nominatim Reverse API
+                try {
+                    val url = URL("${AppConstants.NominatimConstants.REVERSE_URL}?lat=$lat&lon=$lon&format=json&accept-language=zh-CN,zh")
+                    val conn = url.openConnection() as HttpURLConnection
+                    conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
+                    conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
+                    conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
+                    try {
+                        if (conn.responseCode == 200) {
+                            val json = JSONObject(conn.inputStream.bufferedReader().readText())
+                            val address = json.optJSONObject("address")
+                            if (address != null) {
+                                val locality =
+                                    address.optString("city").takeIf { it.isNotEmpty() }
+                                        ?: address.optString("town").takeIf { it.isNotEmpty() }
+                                        ?: address.optString("village").takeIf { it.isNotEmpty() }
+                                        ?: address.optString("municipality").takeIf { it.isNotEmpty() }
+                                val country = address.optString("country").takeIf { it.isNotEmpty() }
+                                if (locality != null) {
+                                    return@withContext if (country != null) "$locality, $country" else locality
+                                }
+                            }
+                        }
+                    } finally {
+                        conn.disconnect()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Nominatim reverse geocode failed", e)
+                }
+
+                null
             }
     }
 
