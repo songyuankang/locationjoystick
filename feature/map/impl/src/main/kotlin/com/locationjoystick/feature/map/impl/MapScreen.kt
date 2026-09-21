@@ -216,6 +216,23 @@ internal fun MapScreen(
         onAction(MapAction.CameraTargetConsumed)
     }
 
+    LaunchedEffect(uiState.mapTileSource) {
+        val map = mapRef.value ?: return@LaunchedEffect
+        map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
+            val layers = style.addLocationLayers(includeSearchMarker = true, tileSource = uiState.mapTileSource)
+            positionSource.value = layers.positionSource
+            tracedSource.value = layers.tracedSource
+            remainingSource.value = layers.remainingSource
+            endpointsSource.value = layers.endpointsSource
+            searchMarkerSource.value = layers.searchMarkerSource
+            pendingTapMarkerSource.value = layers.pendingTapSource
+            jitterRadiusSource.value = layers.jitterRadiusSource
+            val ephemeralSrcs = style.addEphemeralRouteLayers()
+            ephemeralRouteSource.value = ephemeralSrcs.routeSource
+            ephemeralEndpointsSource.value = ephemeralSrcs.endpointsSource
+        }
+    }
+
     LjScaffold(
         title = stringResource(R.string.map_screen_title),
         isSpoofing = spoofToggle.isSpoofing,
@@ -261,8 +278,8 @@ internal fun MapScreen(
                                     ).zoom(AppConstants.MapConstants.DEFAULT_ZOOM)
                                     .build()
 
-                            map.setStyle(Style.Builder().fromUri("asset://empty.json")) { style ->
-                                val layers = style.addLocationLayers(includeSearchMarker = true)
+                            map.setStyle(Style.Builder().fromUri(AppConstants.MapConstants.EMPTY_MAP_STYLE_URI)) { style ->
+                                val layers = style.addLocationLayers(includeSearchMarker = true, tileSource = uiState.mapTileSource)
                                 positionSource.value = layers.positionSource
                                 tracedSource.value = layers.tracedSource
                                 remainingSource.value = layers.remainingSource

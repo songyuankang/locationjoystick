@@ -17,11 +17,14 @@ import com.locationjoystick.core.common.util.RandomCode
 import com.locationjoystick.core.data.FavoriteRepository
 import com.locationjoystick.core.data.RouteRepository
 import com.locationjoystick.core.data.SettingsRepository
+import com.locationjoystick.core.data.TeleportUseCase
 import com.locationjoystick.core.datastore.SettingsSnapshot
 import com.locationjoystick.core.location.CompassHeadingSource
 import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.AppSettings
 import com.locationjoystick.core.model.ExportData
+import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.model.SpeedProfile
 import com.locationjoystick.core.model.SpeedUnit
@@ -61,6 +64,7 @@ class SettingsViewModel
         private val exportSyncClient: ExportSyncClient,
         private val nsdCodeManager: NsdCodeManager,
         private val compassHeadingSource: CompassHeadingSource,
+        private val teleportUseCase: TeleportUseCase,
         @param:ApplicationContext private val context: Context,
     ) : ViewModel() {
         companion object {
@@ -153,6 +157,7 @@ class SettingsViewModel
             val altitudeJitterRadiusMeters: Double? = null,
             val altitudeOverrideButtonEnabled: Boolean? = null,
             val debugStatsEnabled: Boolean? = null,
+            val mapTileSource: MapTileSource? = null,
         )
 
         private val mutableDraft = MutableStateFlow(DraftState())
@@ -228,6 +233,7 @@ class SettingsViewModel
                     altitudeOverrideButtonEnabled =
                         draftState.altitudeOverrideButtonEnabled ?: snapshot.altitudeOverrideButtonEnabled,
                     debugStatsEnabled = draftState.debugStatsEnabled ?: snapshot.debugStatsEnabled,
+                    mapTileSource = draftState.mapTileSource ?: snapshot.mapTileSource,
                     compassTestTargetPackage = compassTestTargetPackage,
                     isCompassServiceGranted = isServiceGranted,
                     themeMode = themeMode,
@@ -406,6 +412,16 @@ class SettingsViewModel
             mutableDraft.update { it.copy(debugStatsEnabled = enabled) }
         }
 
+        fun setMapTileSource(source: MapTileSource) {
+            mutableDraft.update { it.copy(mapTileSource = source) }
+        }
+
+        fun teleportToDebugLocation(latLng: LatLng) {
+            viewModelScope.launch {
+                teleportUseCase.execute(latLng)
+            }
+        }
+
         fun setTapToWalkOverlayEnabled(enabled: Boolean) {
             mutableDraft.update { it.copy(tapToWalkOverlayEnabled = enabled) }
         }
@@ -505,6 +521,7 @@ class SettingsViewModel
                             altitudeJitterRadiusMeters = state.altitudeJitterRadiusMeters,
                             altitudeOverrideButtonEnabled = state.altitudeOverrideButtonEnabled,
                             debugStatsEnabled = state.debugStatsEnabled,
+                            mapTileSource = state.mapTileSource,
                             roamingDefaults =
                                 d.roamingDefaults
                                     ?: settingsRepository.getRoamingDefaults().first(),

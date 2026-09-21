@@ -36,6 +36,7 @@ import com.locationjoystick.core.designsystem.component.LjScaffold
 import com.locationjoystick.core.designsystem.component.LjSectionLabel
 import com.locationjoystick.core.designsystem.component.LjSegmentedControl
 import com.locationjoystick.core.designsystem.component.speedProfileLabel
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.SpeedProfile
 import com.locationjoystick.core.model.SpeedUnit
 import com.locationjoystick.feature.settings.impl.R
@@ -80,6 +81,28 @@ internal fun SettingsGpsSubScreen(
                         LjCard(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 SpeedProfilesSection(uiState, onAction)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LjCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                LjSectionLabel(text = stringResource(R.string.settings_gps_map_tile_source))
+                                Text(
+                                    text = stringResource(R.string.settings_gps_map_tile_source_desc),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LjSegmentedControl(
+                                    options =
+                                        listOf(
+                                            MapTileSource.OSM to "OpenStreetMap (OSM)",
+                                            MapTileSource.GEOQ to "GeoQ 彩色地图 (智图)",
+                                        ),
+                                    selected = uiState.mapTileSource,
+                                    onSelect = { onAction(SettingsAction.SetMapTileSource(it)) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))

@@ -25,4 +25,5 @@ data class AppSettings(
     val altitudeJitterRadiusMeters: Double = 0.25,
     val altitudeOverrideButtonEnabled: Boolean = false,
     val debugStatsEnabled: Boolean = false,
+    val mapTileSource: MapTileSource = MapTileSource.OSM,
 )

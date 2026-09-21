@@ -1,6 +1,8 @@
 package com.locationjoystick.feature.settings.impl
 
 import com.locationjoystick.core.model.AppFeature
+import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.model.SpeedUnit
 import com.locationjoystick.core.model.ThemeMode
@@ -165,6 +167,14 @@ internal sealed class SettingsAction {
 
     data class SetCompassTestTargetPackage(
         val packageName: String,
+    ) : SettingsAction()
+
+    data class SetMapTileSource(
+        val source: MapTileSource,
+    ) : SettingsAction()
+
+    data class TeleportToDebugLocation(
+        val latLng: LatLng,
     ) : SettingsAction()
 
     data class SetThemeMode(

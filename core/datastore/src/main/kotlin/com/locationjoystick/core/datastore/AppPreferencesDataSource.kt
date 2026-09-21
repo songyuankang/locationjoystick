@@ -14,6 +14,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.model.SpeedProfile
@@ -151,6 +152,10 @@ interface PreferencesDataSource {
 
     /** Sets whether the map camera should follow the spoofed location marker. */
     suspend fun setMapFollowsLocation(enabled: Boolean)
+
+    fun getMapTileSource(): Flow<MapTileSource>
+
+    suspend fun setMapTileSource(source: MapTileSource)
 
     fun getRealismBearingHoldIdle(): Flow<Boolean>
 
@@ -361,6 +366,7 @@ data class SettingsSnapshot(
     val altitudeOverrideButtonEnabled: Boolean = false,
     val debugStatsEnabled: Boolean = false,
     val jitterSpeedIdleWobbleProbabilityPct: Int = AppConstants.JitterConstants.SPEED_IDLE_WOBBLE_PROBABILITY_PCT_DEFAULT,
+    val mapTileSource: MapTileSource = MapTileSource.OSM,
 )
 
 fun SpeedProfilePreferences.toActiveSpeedProfile(): SpeedProfile {
@@ -443,6 +449,7 @@ class AppPreferencesDataSource
             val JITTER_MAX_STEP_METERS = doublePreferencesKey("jitter_max_step_meters")
             val LAST_TELEPORT_TIME_MS = longPreferencesKey("last_teleport_time_ms")
             val MAP_FOLLOWS_LOCATION = booleanPreferencesKey("map_follows_location")
+            val MAP_TILE_SOURCE = stringPreferencesKey("map_tile_source")
             val REALISM_BEARING_HOLD_IDLE = booleanPreferencesKey("realism_bearing_hold_idle")
             val REALISM_ALTITUDE_ENABLED = booleanPreferencesKey("realism_altitude_enabled")
             val REALISM_WARMUP_ENABLED = booleanPreferencesKey("realism_warmup_enabled")
@@ -677,6 +684,14 @@ class AppPreferencesDataSource
 
         override suspend fun setMapFollowsLocation(enabled: Boolean) = setPref(Keys.MAP_FOLLOWS_LOCATION, enabled)
 
+        override fun getMapTileSource(): Flow<MapTileSource> =
+            pref(Keys.MAP_TILE_SOURCE, MapTileSource.OSM.name).map { name ->
+                runCatching { MapTileSource.valueOf(name) }.getOrDefault(MapTileSource.OSM)
+            }
+
+        override suspend fun setMapTileSource(source: MapTileSource) =
+            setPref(Keys.MAP_TILE_SOURCE, source.name)
+
         override fun getRealismBearingHoldIdle(): Flow<Boolean> = pref(Keys.REALISM_BEARING_HOLD_IDLE, true)
 
         override fun getRealismAltitudeEnabled(): Flow<Boolean> = pref(Keys.REALISM_ALTITUDE_ENABLED, true)
@@ -893,6 +908,7 @@ class AppPreferencesDataSource
                 prefs[Keys.ALTITUDE_JITTER_RADIUS_METERS] =
                     snapshot.altitudeJitterRadiusMeters.coerceIn(0.0, MAX_JITTER_RADIUS_METERS)
                 prefs[Keys.ALTITUDE_OVERRIDE_BUTTON_ENABLED] = snapshot.altitudeOverrideButtonEnabled
+                prefs[Keys.MAP_TILE_SOURCE] = snapshot.mapTileSource.name
                 prefs[Keys.DEBUG_STATS_ENABLED] = snapshot.debugStatsEnabled
                 prefs[Keys.JITTER_SPEED_IDLE_VARIATION_PCT] =
                     snapshot.jitterSpeedIdleVariationPct.coerceIn(
@@ -993,6 +1009,9 @@ class AppPreferencesDataSource
                             prefs[Keys.ALTITUDE_JITTER_RADIUS_METERS] ?: DEFAULT_ALTITUDE_JITTER_RADIUS_METERS,
                         altitudeOverrideButtonEnabled = prefs[Keys.ALTITUDE_OVERRIDE_BUTTON_ENABLED] ?: false,
                         debugStatsEnabled = prefs[Keys.DEBUG_STATS_ENABLED] ?: false,
+                        mapTileSource = prefs[Keys.MAP_TILE_SOURCE]?.let { name ->
+                            runCatching { MapTileSource.valueOf(name) }.getOrDefault(MapTileSource.OSM)
+                        } ?: MapTileSource.OSM,
                         jitterSpeedIdleVariationPct =
                             prefs[Keys.JITTER_SPEED_IDLE_VARIATION_PCT]
                                 ?: DEFAULT_JITTER_SPEED_IDLE_VARIATION_PCT,

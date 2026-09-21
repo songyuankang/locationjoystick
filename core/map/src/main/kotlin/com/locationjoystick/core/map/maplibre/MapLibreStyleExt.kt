@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.designsystem.LjMapColors
 import com.locationjoystick.core.map.geojson.emptyGeoJson
+import com.locationjoystick.core.model.MapTileSource
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.FillLayer
@@ -14,16 +15,25 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.android.style.sources.TileSet
 
+fun MapTileSource.toTileUrl(): String = when (this) {
+    MapTileSource.OSM -> AppConstants.MapConstants.OSM_TILE_URL
+    MapTileSource.GEOQ -> AppConstants.MapConstants.GEOQ_TILE_URL
+}
+
+fun MapTileSource.toMaxZoom(): Float = when (this) {
+    MapTileSource.OSM -> AppConstants.MapConstants.OSM_MAX_ZOOM
+    MapTileSource.GEOQ -> AppConstants.MapConstants.GEOQ_MAX_ZOOM
+}
+
 /**
- * Adds the OSM raster tile layer to the style.
+ * Adds the raster tile layer to the style.
  */
-fun Style.Builder.addOsmRasterLayer(): Style.Builder {
+fun Style.Builder.addOsmRasterLayer(tileSource: MapTileSource = MapTileSource.OSM): Style.Builder {
     withSource(
         RasterSource(
             MapLibreSourceIds.OSM,
-            TileSet(AppConstants.MapConstants.TILESET_VERSION, AppConstants.MapConstants.OSM_TILE_URL).apply {
-                maxZoom =
-                    AppConstants.MapConstants.OSM_MAX_ZOOM
+            TileSet(AppConstants.MapConstants.TILESET_VERSION, tileSource.toTileUrl()).apply {
+                maxZoom = tileSource.toMaxZoom()
             },
             256,
         ),
@@ -61,12 +71,13 @@ fun Style.addLocationLayers(
     osmLayerId: String = MapLibreLayerIds.OSM,
     lineWidth: Float = 4f,
     includeSearchMarker: Boolean = false,
+    tileSource: MapTileSource = MapTileSource.OSM,
 ): LocationLayerSources {
     addSource(
         RasterSource(
             osmSourceId,
-            TileSet(AppConstants.MapConstants.TILESET_VERSION, AppConstants.MapConstants.OSM_TILE_URL).apply {
-                maxZoom = AppConstants.MapConstants.OSM_MAX_ZOOM
+            TileSet(AppConstants.MapConstants.TILESET_VERSION, tileSource.toTileUrl()).apply {
+                maxZoom = tileSource.toMaxZoom()
             },
             256,
         ),
@@ -188,12 +199,15 @@ data class PickerLayerSources(
  *
  * @param currentPosGeoJson If non-null, a blue dot is added at that GeoJSON position.
  */
-fun Style.addPickerLayers(currentPosGeoJson: String? = null): PickerLayerSources {
+fun Style.addPickerLayers(
+    currentPosGeoJson: String? = null,
+    tileSource: MapTileSource = MapTileSource.OSM,
+): PickerLayerSources {
     addSource(
         RasterSource(
             MapLibreSourceIds.OSM,
-            TileSet(AppConstants.MapConstants.TILESET_VERSION, AppConstants.MapConstants.OSM_TILE_URL).apply {
-                maxZoom = AppConstants.MapConstants.OSM_MAX_ZOOM
+            TileSet(AppConstants.MapConstants.TILESET_VERSION, tileSource.toTileUrl()).apply {
+                maxZoom = tileSource.toMaxZoom()
             },
             256,
         ),
@@ -248,12 +262,15 @@ data class CreatorLayerSources(
  *
  * @param currentPosGeoJson If non-null, a blue dot is added at that GeoJSON position.
  */
-fun Style.addCreatorLayers(currentPosGeoJson: String? = null): CreatorLayerSources {
+fun Style.addCreatorLayers(
+    currentPosGeoJson: String? = null,
+    tileSource: MapTileSource = MapTileSource.OSM,
+): CreatorLayerSources {
     addSource(
         RasterSource(
             MapLibreSourceIds.OSM,
-            TileSet(AppConstants.MapConstants.TILESET_VERSION, AppConstants.MapConstants.OSM_TILE_URL).apply {
-                maxZoom = AppConstants.MapConstants.OSM_MAX_ZOOM
+            TileSet(AppConstants.MapConstants.TILESET_VERSION, tileSource.toTileUrl()).apply {
+                maxZoom = tileSource.toMaxZoom()
             },
             256,
         ),

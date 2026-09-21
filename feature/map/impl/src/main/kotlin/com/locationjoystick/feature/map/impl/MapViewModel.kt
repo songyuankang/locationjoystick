@@ -92,11 +92,16 @@ class MapViewModel
                 combine(
                     settingsRepository.getHideTeleportFeatures(),
                     settingsRepository.getShowRouteJumpButtons(),
-                ) { hideTeleport, showJumpButtons -> hideTeleport to showJumpButtons }
+                    settingsRepository.getMapTileSource(),
+                ) { hideTeleport, showJumpButtons, tileSource -> Triple(hideTeleport, showJumpButtons, tileSource) }
                     .distinctUntilChanged()
-                    .collect { (hideTeleport, showJumpButtons) ->
+                    .collect { (hideTeleport, showJumpButtons, tileSource) ->
                         _uiState.update {
-                            it.copy(hideTeleportFeatures = hideTeleport, showRouteJumpButtons = showJumpButtons)
+                            it.copy(
+                                hideTeleportFeatures = hideTeleport,
+                                showRouteJumpButtons = showJumpButtons,
+                                mapTileSource = tileSource,
+                            )
                         }
                     }
             }

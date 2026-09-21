@@ -26,7 +26,9 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
+import com.locationjoystick.core.model.LatLng
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -332,6 +334,39 @@ private fun DebugSection(
         title = stringResource(R.string.settings_menus_debug_stats),
         description = stringResource(R.string.settings_menus_debug_stats_desc),
     )
+    Spacer(Modifier.height(12.dp))
+    Text(
+        stringResource(R.string.settings_menus_wgs84_debug_cities),
+        style = MaterialTheme.typography.titleSmall,
+    )
+    Spacer(Modifier.height(2.dp))
+    Text(
+        stringResource(R.string.settings_menus_wgs84_debug_cities_desc),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        val testCities =
+            listOf(
+                "北京" to LatLng(39.9042, 116.4074),
+                "上海" to LatLng(31.2304, 121.4737),
+                "广州" to LatLng(23.1291, 113.2644),
+                "西安" to LatLng(34.3416, 108.9398),
+                "成都" to LatLng(30.5728, 104.0668),
+            )
+        testCities.forEach { (name, pos) ->
+            OutlinedButton(
+                onClick = { onAction(SettingsAction.TeleportToDebugLocation(pos)) },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(name, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
 }
 
 // Play's Accessibility API policy requires an in-app disclosure with an explicit accept tap

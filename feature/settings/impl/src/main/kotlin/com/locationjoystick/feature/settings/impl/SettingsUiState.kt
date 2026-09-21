@@ -2,6 +2,7 @@ package com.locationjoystick.feature.settings.impl
 
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.model.AppFeature
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.SpeedProfile
 import com.locationjoystick.core.model.SpeedUnit
 import com.locationjoystick.core.model.ThemeMode
@@ -46,5 +47,6 @@ data class SettingsUiState(
     val altitudeJitterRadiusMeters: Double = AppConstants.RealismConstants.ALTITUDE_SIGMA_METERS,
     val altitudeOverrideButtonEnabled: Boolean = false,
     val debugStatsEnabled: Boolean = false,
+    val mapTileSource: MapTileSource = MapTileSource.OSM,
     val isDirty: Boolean = false,
 )

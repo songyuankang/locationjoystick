@@ -18,6 +18,10 @@
     <string name="settings_hub_danger">"危险操作"</string>
     <string name="settings_hub_report">"反馈"</string>
     <string name="settings_hub_movement_and_gps">"移动与 GPS"</string>
+    <string name="settings_gps_map_tile_source">"地图图层源"</string>
+    <string name="settings_gps_map_tile_source_desc">"选择地图显示的瓦片图层源（可无缝切换 OSM 与 GeoQ 彩色底图）。"</string>
+    <string name="settings_menus_wgs84_debug_cities">"WGS84 城市测试点 (测试 GeoQ 底图偏移)"</string>
+    <string name="settings_menus_wgs84_debug_cities_desc">"点击一键传送至该城市定点 WGS84 坐标，可在地图或悬浮窗上观察 GeoQ 底图偏差。"</string>
     <string name="settings_hub_movement_and_gps_desc">"所有移动模式的速度预设、信号真实度与位置随机性设置。"</string>
     <string name="settings_hub_menus">"菜单"</string>
     <string name="settings_hub_menus_desc">"悬浮窗和地图按钮中显示哪些功能，以及如何通过点击触发行走。"</string>

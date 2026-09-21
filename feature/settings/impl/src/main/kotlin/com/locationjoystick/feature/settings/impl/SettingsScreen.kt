@@ -394,6 +394,14 @@ fun SettingsRoute(
                     viewModel.setDebugStatsEnabled(action.enabled)
                 }
 
+                is SettingsAction.SetMapTileSource -> {
+                    viewModel.setMapTileSource(action.source)
+                }
+
+                is SettingsAction.TeleportToDebugLocation -> {
+                    viewModel.teleportToDebugLocation(action.latLng)
+                }
+
                 is SettingsAction.SetTapToWalkOverlayEnabled -> {
                     viewModel.setTapToWalkOverlayEnabled(action.enabled)
                 }

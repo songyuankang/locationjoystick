@@ -18,6 +18,10 @@
     <string name="settings_hub_danger">"Danger"</string>
     <string name="settings_hub_report">"Report"</string>
     <string name="settings_hub_movement_and_gps">"Movement &amp; GPS"</string>
+    <string name="settings_gps_map_tile_source">"Map Tile Source"</string>
+    <string name="settings_gps_map_tile_source_desc">"Select the map tile source (switch seamlessly between OSM and GeoQ)."</string>
+    <string name="settings_menus_wgs84_debug_cities">"WGS84 Test Cities (GeoQ Offset Test)"</string>
+    <string name="settings_menus_wgs84_debug_cities_desc">"Tap to teleport to fixed WGS84 coordinates and observe GeoQ map offset."</string>
     <string name="settings_hub_movement_and_gps_desc">"Speed presets, signal realism, and location randomness for all movement modes."</string>
     <string name="settings_hub_menus">"Menus"</string>
     <string name="settings_hub_menus_desc">"Which features appear in the floating widget and map buttons, and how to trigger walks by tapping."</string>

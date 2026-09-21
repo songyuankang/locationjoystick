@@ -152,8 +152,10 @@ object AppConstants {
         const val DEFAULT_LON = 2.3522
         const val DEFAULT_ZOOM = 15.0
         const val OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        const val GEOQ_TILE_URL = "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}"
         const val TILESET_VERSION = "2.2.0"
         const val OSM_MAX_ZOOM = 19f
+        const val GEOQ_MAX_ZOOM = 18f
         const val EMPTY_MAP_STYLE_URI = "asset://empty.json"
         const val OSM_SOURCE_ID = "osm-source"
         const val OSM_LAYER_ID = "osm-layer"
