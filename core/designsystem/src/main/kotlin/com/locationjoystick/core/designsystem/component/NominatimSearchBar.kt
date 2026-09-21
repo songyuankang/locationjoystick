@@ -1,5 +1,7 @@
 package com.locationjoystick.core.designsystem.component
 
+import android.content.Context
+import android.location.Geocoder
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -52,6 +55,7 @@ import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.util.Locale
 
 private const val TAG = "NominatimSearchBar"
 
@@ -66,6 +70,7 @@ fun NominatimSearchBar(
     var results by remember { mutableStateOf<List<NominatimResult>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     LaunchedEffect(query) {
         val rawCoords = parseRawLatLng(query)
@@ -88,11 +93,14 @@ fun NominatimSearchBar(
         delay(AppConstants.NominatimConstants.SEARCH_DEBOUNCE_MS)
         isLoading = true
         withContext(Dispatchers.IO) {
-            var parsed = queryNominatim(query)
-            if (parsed.isEmpty() && (query.contains("县") || query.contains("市") || query.contains("区"))) {
-                val shortTerm = query.substringAfter("县").substringAfter("市").substringAfter("区").trim()
-                if (shortTerm.length >= 2) {
-                    parsed = queryNominatim(shortTerm)
+            var parsed = querySystemGeocoder(context, query)
+            if (parsed.isEmpty()) {
+                parsed = queryNominatim(query)
+                if (parsed.isEmpty() && (query.contains("县") || query.contains("市") || query.contains("区"))) {
+                    val shortTerm = query.substringAfter("县").substringAfter("市").substringAfter("区").trim()
+                    if (shortTerm.length >= 2) {
+                        parsed = queryNominatim(shortTerm)
+                    }
                 }
             }
             results = parsed
@@ -274,3 +282,36 @@ private fun queryNominatim(searchTerm: String): List<NominatimResult> {
         emptyList()
     }
 }
+
+private suspend fun querySystemGeocoder(context: Context, query: String): List<NominatimResult> =
+    withContext(Dispatchers.IO) {
+        if (!Geocoder.isPresent()) return@withContext emptyList()
+        try {
+            val geocoder = Geocoder(context, Locale.SIMPLIFIED_CHINESE)
+            @Suppress("DEPRECATION")
+            val addresses = geocoder.getFromLocationName(query, 5) ?: emptyList()
+            addresses.mapNotNull { addr ->
+                if (addr.hasLatitude() && addr.hasLongitude()) {
+                    val parts =
+                        listOfNotNull(
+                            addr.featureName,
+                            addr.thoroughfare,
+                            addr.subLocality,
+                            addr.locality,
+                            addr.subAdminArea,
+                            addr.adminArea,
+                            addr.countryName,
+                        ).filter { it.isNotBlank() }.distinct()
+                    val name = if (parts.isNotEmpty()) parts.joinToString(", ") else query
+                    NominatimResult(
+                        lat = addr.latitude,
+                        lon = addr.longitude,
+                        displayName = name,
+                    )
+                } else null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "System Geocoder failed for $query", e)
+            emptyList()
+        }
+    }
