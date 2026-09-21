@@ -207,9 +207,11 @@ internal fun OnboardingScreen(
                 )
                 TextButton(
                     onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.DOCS_URL)),
-                        )
+                        if (AppConstants.AppInfo.DOCS_URL.isNotBlank()) {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.DOCS_URL)),
+                            )
+                        }
                     },
                 ) {
                     Text(
@@ -224,9 +226,11 @@ internal fun OnboardingScreen(
                 )
                 TextButton(
                     onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.TROUBLESHOOTING_URL)),
-                        )
+                        if (AppConstants.AppInfo.TROUBLESHOOTING_URL.isNotBlank()) {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.TROUBLESHOOTING_URL)),
+                            )
+                        }
                     },
                 ) {
                     Text(
