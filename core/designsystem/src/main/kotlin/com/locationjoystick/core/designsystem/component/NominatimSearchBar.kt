@@ -251,36 +251,49 @@ private data class NominatimResult(
     val displayName: String,
 )
 
+private val NOMINATIM_MIRRORS =
+    listOf(
+        "https://nominatim.openstreetmap.org/search",
+        "https://nominatim.kumi.systems/search",
+        "https://nominatim.openstreetmap.de/search",
+    )
+
 private fun queryNominatim(searchTerm: String): List<NominatimResult> {
-    return try {
-        val encoded = URLEncoder.encode(searchTerm, "UTF-8")
-        val url = URL("${AppConstants.NominatimConstants.SEARCH_URL}?q=$encoded&format=json&limit=5&accept-language=zh-CN,zh;q=0.9,en;q=0.8")
-        val conn = url.openConnection() as HttpURLConnection
-        conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
-        conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
-        conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
+    val encoded = URLEncoder.encode(searchTerm, "UTF-8")
+    for (baseUrl in NOMINATIM_MIRRORS) {
         try {
-            val responseText = conn.inputStream.bufferedReader().readText()
-            val array = JSONArray(responseText)
-            (0 until minOf(array.length(), 5)).mapNotNull { i ->
-                try {
-                    val obj = array.getJSONObject(i)
-                    NominatimResult(
-                        lat = obj.getDouble("lat"),
-                        lon = obj.getDouble("lon"),
-                        displayName = obj.getString("display_name"),
-                    )
-                } catch (_: Exception) {
-                    null
+            val url = URL("$baseUrl?q=$encoded&format=json&limit=5&accept-language=zh-CN,zh;q=0.9,en;q=0.8")
+            val conn = url.openConnection() as HttpURLConnection
+            conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
+            conn.connectTimeout = 3000
+            conn.readTimeout = 3000
+            try {
+                if (conn.responseCode == 200) {
+                    val responseText = conn.inputStream.bufferedReader().readText()
+                    val array = JSONArray(responseText)
+                    val parsed =
+                        (0 until minOf(array.length(), 5)).mapNotNull { i ->
+                            try {
+                                val obj = array.getJSONObject(i)
+                                NominatimResult(
+                                    lat = obj.getDouble("lat"),
+                                    lon = obj.getDouble("lon"),
+                                    displayName = obj.getString("display_name"),
+                                )
+                            } catch (_: Exception) {
+                                null
+                            }
+                        }
+                    if (parsed.isNotEmpty()) return parsed
                 }
+            } finally {
+                conn.disconnect()
             }
-        } finally {
-            conn.disconnect()
+        } catch (e: Exception) {
+            Log.e("NominatimSearchBar", "Search mirror $baseUrl failed for $searchTerm", e)
         }
-    } catch (e: Exception) {
-        Log.e("NominatimSearchBar", "Search failed for $searchTerm", e)
-        emptyList()
     }
+    return emptyList()
 }
 
 private suspend fun querySystemGeocoder(context: Context, query: String): List<NominatimResult> =
