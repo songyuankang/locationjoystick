@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.locationjoystick.core.common.constants.AppConstants
+import com.locationjoystick.core.common.util.toGcj02
+import com.locationjoystick.core.common.util.toWgs84
 import com.locationjoystick.core.designsystem.component.LjScaffold
 import com.locationjoystick.core.designsystem.component.NominatimSearchBar
 import com.locationjoystick.core.location.rememberSpoofToggleState
@@ -52,6 +54,8 @@ import com.locationjoystick.core.map.geojson.buildRouteTraceGeoJson
 import com.locationjoystick.core.map.geojson.emptyGeoJson
 import com.locationjoystick.core.map.maplibre.addEphemeralRouteLayers
 import com.locationjoystick.core.map.maplibre.addLocationLayers
+import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.feature.map.api.MAP_ROUTE
 import com.locationjoystick.feature.map.impl.R
@@ -112,6 +116,16 @@ fun NavGraphBuilder.mapScreen(
     ) {
         MapRoute(onOpenDrawer = onOpenDrawer, onNavigateToRoutes = onNavigateToRoutes, bottomBar = bottomBar)
     }
+}
+
+private fun LatLng?.toRenderLatLng(isGeoq: Boolean): LatLng? {
+    if (this == null) return null
+    return if (isGeoq) this.toGcj02() else this
+}
+
+private fun List<LatLng>?.toRenderLatLngs(isGeoq: Boolean): List<LatLng>? {
+    if (this == null) return null
+    return if (isGeoq) this.map { it.toGcj02() } else this
 }
 
 @Composable
@@ -207,10 +221,11 @@ internal fun MapScreen(
 
     LaunchedEffect(uiState.pendingCameraTarget) {
         val target = uiState.pendingCameraTarget ?: return@LaunchedEffect
-        // Use closer zoom for favorite teleports (street-level), default zoom for other cases
+        val isGeoq = uiState.mapTileSource == MapTileSource.GEOQ
+        val renderTarget = target.toRenderLatLng(isGeoq)!!
         val zoom = if (uiState.favoriteTarget != null) 18.0 else AppConstants.MapConstants.DEFAULT_ZOOM
         mapRef.value?.animateCamera(
-            CameraUpdateFactory.newLatLngZoom(MapLatLng(target.latitude, target.longitude), zoom),
+            CameraUpdateFactory.newLatLngZoom(MapLatLng(renderTarget.latitude, renderTarget.longitude), zoom),
             500,
         )
         onAction(MapAction.CameraTargetConsumed)
@@ -293,26 +308,18 @@ internal fun MapScreen(
                             }
 
                             map.addOnMapClickListener { latLng ->
-                                onAction(
-                                    MapAction.TapToTeleport(
-                                        com.locationjoystick.core.model.LatLng(
-                                            latitude = latLng.latitude,
-                                            longitude = latLng.longitude,
-                                        ),
-                                    ),
-                                )
+                                val isGeoq = uiState.mapTileSource == MapTileSource.GEOQ
+                                val tappedGcj = LatLng(latLng.latitude, latLng.longitude)
+                                val wgsPos = if (isGeoq) tappedGcj.toWgs84() else tappedGcj
+                                onAction(MapAction.TapToTeleport(wgsPos))
                                 true
                             }
 
                             map.addOnMapLongClickListener { latLng ->
-                                onAction(
-                                    MapAction.LongPressTapToWalk(
-                                        com.locationjoystick.core.model.LatLng(
-                                            latitude = latLng.latitude,
-                                            longitude = latLng.longitude,
-                                        ),
-                                    ),
-                                )
+                                val isGeoq = uiState.mapTileSource == MapTileSource.GEOQ
+                                val tappedGcj = LatLng(latLng.latitude, latLng.longitude)
+                                val wgsPos = if (isGeoq) tappedGcj.toWgs84() else tappedGcj
+                                onAction(MapAction.LongPressTapToWalk(wgsPos))
                                 true
                             }
 
@@ -333,31 +340,33 @@ internal fun MapScreen(
                     val endpointsSrc = endpointsSource.value ?: return@AndroidView
                     val ephemeralRouteSrc = ephemeralRouteSource.value ?: return@AndroidView
                     val ephemeralEndpointsSrc = ephemeralEndpointsSource.value ?: return@AndroidView
+                    val isGeoq = uiState.mapTileSource == MapTileSource.GEOQ
                     val position = uiState.currentPosition
+                    val renderPosition = position.toRenderLatLng(isGeoq)
 
-                    src.setGeoJson(buildPositionGeoJson(position))
+                    src.setGeoJson(buildPositionGeoJson(renderPosition))
 
                     jitterRadiusSource.value?.setGeoJson(
-                        if (uiState.showJitterRadiusOverlay && position != null) {
-                            buildCirclePolygonGeoJson(position, uiState.jitterRadiusMeters)
+                        if (uiState.showJitterRadiusOverlay && renderPosition != null) {
+                            buildCirclePolygonGeoJson(renderPosition, uiState.jitterRadiusMeters)
                         } else {
                             emptyGeoJson()
                         },
                     )
 
-                    pendingTapMarkerSource.value?.setGeoJson(buildPositionGeoJson(uiState.pendingTapPosition))
+                    pendingTapMarkerSource.value?.setGeoJson(buildPositionGeoJson(uiState.pendingTapPosition.toRenderLatLng(isGeoq)))
 
                     val traceWaypoints =
-                        uiState.routeTrace
-                            ?: uiState.ephemeralWaypoints.takeIf { it.size >= 2 }
-                    if (traceWaypoints != null && position != null) {
-                        val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(traceWaypoints, position)
+                        (uiState.routeTrace
+                            ?: uiState.ephemeralWaypoints.takeIf { it.size >= 2 }).toRenderLatLngs(isGeoq)
+                    if (traceWaypoints != null && renderPosition != null) {
+                        val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(traceWaypoints, renderPosition)
                         tracedSrc.setGeoJson(tracedGeoJson)
                         remainingSrc.setGeoJson(remainingGeoJson)
                         endpointsSrc.setGeoJson(buildPointsGeoJson(traceWaypoints))
-                    } else if (uiState.walkStart != null && uiState.walkTarget != null && position != null) {
-                        val walkPoints = listOfNotNull(uiState.walkStart, uiState.walkTarget)
-                        val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(walkPoints, position)
+                    } else if (uiState.walkStart != null && uiState.walkTarget != null && renderPosition != null) {
+                        val walkPoints = listOfNotNull(uiState.walkStart, uiState.walkTarget).toRenderLatLngs(isGeoq)!!
+                        val (tracedGeoJson, remainingGeoJson) = buildRouteTraceGeoJson(walkPoints, renderPosition)
                         tracedSrc.setGeoJson(tracedGeoJson)
                         remainingSrc.setGeoJson(remainingGeoJson)
                         endpointsSrc.setGeoJson(buildPointsGeoJson(walkPoints))
@@ -369,11 +378,12 @@ internal fun MapScreen(
 
                     // Ephemeral route preview polyline — show roaming preview when the sheet is open or minimized
                     val displayWaypoints =
-                        if (uiState.showRoamingSheet || uiState.isRoamingSheetMinimized) {
+                        (if (uiState.showRoamingSheet || uiState.isRoamingSheetMinimized) {
                             uiState.roamingPreviewWaypoints ?: emptyList()
                         } else {
                             uiState.ephemeralWaypoints
-                        }
+                        }).toRenderLatLngs(isGeoq) ?: emptyList()
+
                     if (displayWaypoints.size >= 2) {
                         ephemeralRouteSrc.setGeoJson(buildLineGeoJson(displayWaypoints))
                         ephemeralEndpointsSrc.setGeoJson(buildPointsGeoJson(displayWaypoints))
@@ -382,10 +392,10 @@ internal fun MapScreen(
                         ephemeralEndpointsSrc.setGeoJson(emptyGeoJson())
                     }
 
-                    if (isFollowingCamera.value && position != null) {
+                    if (isFollowingCamera.value && renderPosition != null) {
                         map.animateCamera(
                             CameraUpdateFactory.newLatLng(
-                                MapLatLng(position.latitude, position.longitude),
+                                MapLatLng(renderPosition.latitude, renderPosition.longitude),
                             ),
                             500,
                         )
@@ -422,14 +432,14 @@ internal fun MapScreen(
             if (showSearch.value) {
                 NominatimSearchBar(
                     onLocationSelected = { lat, lon, _ ->
-                        val position =
-                            com.locationjoystick.core.model
-                                .LatLng(latitude = lat, longitude = lon)
+                        val isGeoq = uiState.mapTileSource == MapTileSource.GEOQ
+                        val position = LatLng(latitude = lat, longitude = lon)
+                        val renderPos = position.toRenderLatLng(isGeoq)!!
                         mapRef.value?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(MapLatLng(lat, lon), AppConstants.MapConstants.DEFAULT_ZOOM),
+                            CameraUpdateFactory.newLatLngZoom(MapLatLng(renderPos.latitude, renderPos.longitude), AppConstants.MapConstants.DEFAULT_ZOOM),
                             500,
                         )
-                        searchMarkerSource.value?.setGeoJson(buildMarkerGeoJson(lat, lon))
+                        searchMarkerSource.value?.setGeoJson(buildMarkerGeoJson(renderPos.latitude, renderPos.longitude))
                         showSearch.value = false
                         onAction(MapAction.TapToTeleport(position))
                     },
