@@ -30,8 +30,10 @@ import androidx.compose.ui.unit.dp
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.common.util.toLocaleDoubleOrNull
 import com.locationjoystick.core.designsystem.LjIcons
+import com.locationjoystick.core.designsystem.component.LjCard
 import com.locationjoystick.core.designsystem.component.LjCheckboxRow
 import com.locationjoystick.core.designsystem.component.LjScaffold
+import com.locationjoystick.core.designsystem.component.LjSectionLabel
 import com.locationjoystick.core.designsystem.component.LjSegmentedControl
 import com.locationjoystick.core.designsystem.component.speedProfileLabel
 import com.locationjoystick.core.model.SpeedProfile
@@ -75,26 +77,41 @@ internal fun SettingsGpsSubScreen(
                                 .verticalScroll(remember { ScrollState(0) })
                                 .padding(16.dp),
                     ) {
-                        SpeedProfilesSection(uiState, onAction)
-                        Spacer(modifier = Modifier.height(24.dp))
-                        GpsJitterSection(uiState, isMph, onAction)
-                        Spacer(modifier = Modifier.height(24.dp))
-                        GpsRealismSection(uiState, isMph, onAction)
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(stringResource(R.string.settings_gps_location_memory), style = MaterialTheme.typography.headlineSmall)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.settings_gps_controls_whether_the_app_remembers_where),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LjCheckboxRow(
-                            checked = uiState.rememberLastLocation,
-                            onCheckedChange = { onAction(SettingsAction.SetRememberLastLocation(it)) },
-                            title = stringResource(R.string.settings_gps_remember_last_location),
-                            description = stringResource(R.string.settings_gps_remember_last_location_desc),
-                        )
+                        LjCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                SpeedProfilesSection(uiState, onAction)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LjCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                GpsJitterSection(uiState, isMph, onAction)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LjCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                GpsRealismSection(uiState, isMph, onAction)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LjCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                LjSectionLabel(text = stringResource(R.string.settings_gps_location_memory))
+                                Text(
+                                    stringResource(R.string.settings_gps_controls_whether_the_app_remembers_where),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LjCheckboxRow(
+                                    checked = uiState.rememberLastLocation,
+                                    onCheckedChange = { onAction(SettingsAction.SetRememberLastLocation(it)) },
+                                    title = stringResource(R.string.settings_gps_remember_last_location),
+                                    description = stringResource(R.string.settings_gps_remember_last_location_desc),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -107,8 +124,7 @@ private fun SpeedProfilesSection(
     uiState: SettingsUiState,
     onAction: (SettingsAction) -> Unit,
 ) {
-    Text(stringResource(R.string.settings_gps_speed_profiles), style = MaterialTheme.typography.headlineSmall)
-    Spacer(modifier = Modifier.height(4.dp))
+    LjSectionLabel(text = stringResource(R.string.settings_gps_speed_profiles))
     Text(
         stringResource(R.string.settings_gps_movement_speed_used_by_the_joystick),
         style = MaterialTheme.typography.bodySmall,

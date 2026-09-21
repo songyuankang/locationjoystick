@@ -9,7 +9,7 @@
     <string name="notification_title_permission_error">"Permissions missing"</string>
     <string name="notification_text_permission_error">"Open the app and complete setup to start spoofing."</string>
     <string name="notification_title_active">"Mock location active"</string>
-    <string name="notification_text_active">"locationjoystick is spoofing your GPS position"</string>
+    <string name="notification_text_active">"coco is spoofing your GPS position"</string>
     <string name="notification_action_stop">"Stop"</string>
     <string name="notification_action_map">"Map"</string>
     <string name="notification_action_favorites">"Favorites"</string>

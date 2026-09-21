@@ -19,18 +19,26 @@ fun LjCard(
     interactionSource: MutableInteractionSource? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val colors =
+        CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        )
     if (onClick != null) {
         ElevatedCard(
             onClick = onClick,
             modifier = modifier,
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+            colors = colors,
+            shape = MaterialTheme.shapes.large,
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
             interactionSource = interactionSource,
             content = content,
         )
     } else {
         ElevatedCard(
             modifier = modifier,
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+            colors = colors,
+            shape = MaterialTheme.shapes.large,
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
             content = content,
         )
     }

@@ -96,7 +96,7 @@ fun Style.addLocationLayers(
     addLayer(
         LineLayer(MapLibreLayerIds.TRACE_TRACED, MapLibreSourceIds.TRACE_TRACED)
             .withProperties(
-                PropertyFactory.lineColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.lineColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.lineWidth(lineWidth),
                 PropertyFactory.lineDasharray(arrayOf(2f, 2f)),
             ),
@@ -107,7 +107,7 @@ fun Style.addLocationLayers(
     addLayer(
         LineLayer(MapLibreLayerIds.TRACE_REMAINING, MapLibreSourceIds.TRACE_REMAINING)
             .withProperties(
-                PropertyFactory.lineColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.lineColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.lineWidth(lineWidth),
             ),
     )
@@ -118,7 +118,7 @@ fun Style.addLocationLayers(
         CircleLayer(MapLibreLayerIds.ENDPOINTS, MapLibreSourceIds.ENDPOINTS)
             .withProperties(
                 PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                PropertyFactory.circleColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.circleColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                 PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
             ),
@@ -145,7 +145,7 @@ fun Style.addLocationLayers(
             CircleLayer(MapLibreLayerIds.SEARCH_MARKER, MapLibreSourceIds.SEARCH_MARKER)
                 .withProperties(
                     PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                    PropertyFactory.circleColor(LjMapColors.RouteOrange.toArgb()),
+                    PropertyFactory.circleColor(LjMapColors.RouteLine.toArgb()),
                     PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                     PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
                 ),
@@ -158,7 +158,7 @@ fun Style.addLocationLayers(
         CircleLayer(MapLibreLayerIds.PENDING_TAP, MapLibreSourceIds.PENDING_TAP)
             .withProperties(
                 PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                PropertyFactory.circleColor(LjMapColors.PendingTapGreen.toArgb()),
+                PropertyFactory.circleColor(LjMapColors.PendingTap.toArgb()),
                 PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                 PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
             ),
@@ -221,7 +221,7 @@ fun Style.addPickerLayers(currentPosGeoJson: String? = null): PickerLayerSources
         CircleLayer(MapLibreLayerIds.MARKER, MapLibreSourceIds.MARKER)
             .withProperties(
                 PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                PropertyFactory.circleColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.circleColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                 PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
             ),
@@ -280,7 +280,7 @@ fun Style.addCreatorLayers(currentPosGeoJson: String? = null): CreatorLayerSourc
     addLayer(
         LineLayer(MapLibreLayerIds.ROUTE_SEGMENTS, MapLibreSourceIds.ROUTE_SEGMENTS)
             .withProperties(
-                PropertyFactory.lineColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.lineColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.lineWidth(3f),
             ),
     )
@@ -291,7 +291,7 @@ fun Style.addCreatorLayers(currentPosGeoJson: String? = null): CreatorLayerSourc
         CircleLayer(MapLibreLayerIds.ROUTE_WAYPOINTS, MapLibreSourceIds.ROUTE_WAYPOINTS)
             .withProperties(
                 PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                PropertyFactory.circleColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.circleColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                 PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
             ),
@@ -323,7 +323,7 @@ fun Style.addEphemeralRouteLayers(): EphemeralRouteLayerSources {
     addLayerBelow(
         LineLayer(MapLibreLayerIds.EPHEMERAL_ROUTE, MapLibreSourceIds.EPHEMERAL_ROUTE)
             .withProperties(
-                PropertyFactory.lineColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.lineColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.lineWidth(3f),
                 PropertyFactory.lineDasharray(arrayOf(4f, 4f)),
             ),
@@ -336,7 +336,7 @@ fun Style.addEphemeralRouteLayers(): EphemeralRouteLayerSources {
         CircleLayer(MapLibreLayerIds.EPHEMERAL_ENDPOINTS, MapLibreSourceIds.EPHEMERAL_ENDPOINTS)
             .withProperties(
                 PropertyFactory.circleRadius(AppConstants.MapConstants.ROUTE_POINT_RADIUS),
-                PropertyFactory.circleColor(LjMapColors.RouteOrange.toArgb()),
+                PropertyFactory.circleColor(LjMapColors.RouteLine.toArgb()),
                 PropertyFactory.circleStrokeColor(LjMapColors.PointStroke.toArgb()),
                 PropertyFactory.circleStrokeWidth(AppConstants.MapConstants.POINT_STROKE_WIDTH),
             ),

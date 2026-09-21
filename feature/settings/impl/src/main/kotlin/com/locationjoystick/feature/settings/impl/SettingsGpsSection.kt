@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.locationjoystick.core.common.util.toLocaleDoubleOrNull
 import com.locationjoystick.core.designsystem.component.LjButton
 import com.locationjoystick.core.designsystem.component.LjCheckboxRow
+import com.locationjoystick.core.designsystem.component.LjSectionLabel
 import com.locationjoystick.feature.settings.impl.R
 import kotlin.math.roundToInt
 
@@ -105,8 +106,7 @@ internal fun GpsJitterSection(
     isMph: Boolean,
     onAction: (SettingsAction) -> Unit,
 ) {
-    Text(stringResource(R.string.settings_gps_section_location_randomness), style = MaterialTheme.typography.headlineSmall)
-    Spacer(modifier = Modifier.height(4.dp))
+    LjSectionLabel(text = stringResource(R.string.settings_gps_section_location_randomness))
     Text(
         stringResource(R.string.settings_gps_section_adds_small_random_shifts_to_your),
         style = MaterialTheme.typography.bodySmall,

@@ -170,7 +170,11 @@ internal fun FavoritesScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddOptionsSheet = true }) {
+            FloatingActionButton(
+                onClick = { showAddOptionsSheet = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ) {
                 Icon(LjIcons.Add, contentDescription = stringResource(R.string.favorites_screen_add_favorite_cd))
             }
         },
@@ -420,6 +424,7 @@ private fun FavoriteCard(
         Text(
             "${String.format("%.4f", favorite.position.latitude)}, ${String.format("%.4f", favorite.position.longitude)}",
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(6.dp))
         CooldownAdvisoryBadge(cooldownState.toBadgeText(currentPosition, favorite.position))

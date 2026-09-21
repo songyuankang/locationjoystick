@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">locationjoystick</string>
-    <string name="accessibility_service_label">locationjoystick compass</string>
+    <string name="app_name">coco</string>
+    <string name="accessibility_service_label">coco compass</string>
     <string name="accessibility_service_description">Used only by the optional Tap to Walk compass feature, when you enable it in Settings. Reads the on-screen compass direction so your taps map to the correct real-world direction. Not an accessibility tool for users with disabilities.</string>
     <string name="app_couldn_t_open_that_link">"Couldn't open that link"</string>
     <string name="drawer_close_menu_cd">"Close menu"</string>
@@ -21,11 +21,21 @@
     <string name="drawer_website">"Website"</string>
     <string name="drawer_discord_cd">"Discord"</string>
     <string name="drawer_discord">"Discord"</string>
+    <string name="drawer_version">"v%1$s"</string>
     <string name="idle_map_description">"Spoof your GPS location and control movement on the map."</string>
     <string name="idle_routes_description">"Replay saved routes."</string>
     <string name="idle_favorites_description">"Teleport or walk to saved locations."</string>
     <string name="idle_group_sync_description">"Mirror your location to other devices on the same Wi-Fi."</string>
-    <string name="idle_settings_description">"Configure locationjoystick and spoof preferences."</string>
+    <string name="idle_settings_description">"Configure coco and spoof preferences."</string>
+    <string name="idle_status_spoofing">"Simulating"</string>
+    <string name="idle_status_idle">"Not simulating"</string>
+    <string name="idle_status_no_location">"No location selected yet"</string>
+    <string name="idle_status_card_cd">"Simulation status"</string>
+    <string name="idle_quick_actions">"Quick actions"</string>
+    <string name="idle_last_location">"Last location"</string>
+    <string name="idle_permissions_ok">"All permissions granted"</string>
+    <string name="idle_permissions_missing">"Some permissions are missing"</string>
+    <string name="idle_permissions_fix">"Fix"</string>
     <string name="whats_new_new_and_improved">"New &amp; Improved"</string>
     <string name="whats_new_fixes">"Fixes"</string>
     <string name="whats_new_what_s_new">"What's new"</string>

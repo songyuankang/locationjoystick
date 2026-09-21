@@ -6,7 +6,7 @@ Key files: `:core:designsystem/LjColors.kt`, `:core:designsystem/LjTheme.kt`, `:
 
 ## Modes
 
-`ThemeMode` (`:core:model`): `DARK` (default, orange-on-black) or `LIGHT` (high-contrast, dark text on a light background). Both share the same `LjTypography` and `LjShapes` — only colors differ; text/font scaling is a separate, unimplemented ask.
+`ThemeMode` (`:core:model`): `DARK` (default, deep-space blue tech palette: background `#08111F`, card `#142033`, primary blue `#3284FF`) or `LIGHT` (high-contrast, dark text on a light background, blue accent `#1F6AE0`). Both share the same `LjTypography` and `LjShapes` — only colors differ; text/font scaling is a separate, unimplemented ask.
 
 ## Storage
 

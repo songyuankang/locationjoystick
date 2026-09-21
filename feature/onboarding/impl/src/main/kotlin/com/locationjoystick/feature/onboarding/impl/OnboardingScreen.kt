@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -59,10 +57,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.designsystem.LjIcons
+import com.locationjoystick.core.designsystem.LjSuccess
+import com.locationjoystick.core.designsystem.LjSuccessContainer
 import com.locationjoystick.core.designsystem.LjTheme
 import com.locationjoystick.core.designsystem.LjWarning
 import com.locationjoystick.core.designsystem.LjWarningContainer
 import com.locationjoystick.core.designsystem.component.AppIcon
+import com.locationjoystick.core.designsystem.component.LjCard
 import com.locationjoystick.core.designsystem.component.LjLanguageDropdown
 import com.locationjoystick.core.designsystem.component.LjPrimaryButton
 import com.locationjoystick.core.designsystem.component.LjScaffold
@@ -380,19 +381,18 @@ private fun OnboardingStepCard(
     onExtraAction: (() -> Unit)? = null,
 ) {
     val statusColor by animateColorAsState(
-        targetValue = if (isGranted) MaterialTheme.colorScheme.secondary else LjWarning,
+        targetValue = if (isGranted) LjSuccess else LjWarning,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "statusColor",
     )
     val statusContainerColor by animateColorAsState(
-        targetValue = if (isGranted) MaterialTheme.colorScheme.secondaryContainer else LjWarningContainer,
+        targetValue = if (isGranted) LjSuccessContainer else LjWarningContainer,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "statusContainerColor",
     )
 
-    ElevatedCard(
+    LjCard(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier =
@@ -428,7 +428,7 @@ private fun OnboardingStepCard(
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
                 )

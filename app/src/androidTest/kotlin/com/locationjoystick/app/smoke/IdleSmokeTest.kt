@@ -22,7 +22,7 @@ class IdleSmokeTest : BaseSmokeTest() {
 
     @Test
     fun idle_screen_loads() {
-        composeRule.onNodeWithText("locationjoystick").assertIsDisplayed()
+        composeRule.onNodeWithText("coco").assertIsDisplayed()
     }
 
     @Test
@@ -41,7 +41,7 @@ class IdleSmokeTest : BaseSmokeTest() {
         composeRule.openDrawer()
         composeRule.onNodeWithContentDescription("Close menu").performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("locationjoystick").assertIsDisplayed()
+        composeRule.onNodeWithText("coco").assertIsDisplayed()
     }
 
     @Test

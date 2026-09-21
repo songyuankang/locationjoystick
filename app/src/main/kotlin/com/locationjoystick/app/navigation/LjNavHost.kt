@@ -168,8 +168,8 @@ fun LjNavHost(
                 onNavigateToSettings = {
                     navController.navigate(SETTINGS_ROUTE) { launchSingleTop = true }
                 },
-                onNavigateToGroup = {
-                    navController.navigate(GROUP_ROUTE) { launchSingleTop = true }
+                onNavigateToOnboarding = {
+                    navController.navigate(ONBOARDING_ROUTE) { launchSingleTop = true }
                 },
             )
         }

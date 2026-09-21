@@ -27,6 +27,8 @@ Thumbs.db
 .agents
 .shortcuts
 .claude/.radin
+.workbuddy/
+app_icon.png
 
 # Python
 **__pycache__

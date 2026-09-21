@@ -37,6 +37,7 @@ class WhatsNewRepository
 
         suspend fun fetchEntries(version: String): List<WhatsNewEntry>? =
             withContext(Dispatchers.IO) {
+                if (baseUrl.isBlank()) return@withContext null
                 runCatching {
                     val url = "$baseUrl${version.substringBefore("-")}.json"
                     client.newCall(Request.Builder().url(url).build()).execute().use { resp ->

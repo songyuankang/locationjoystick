@@ -13,9 +13,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -44,11 +48,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.designsystem.LjIcons
-import com.locationjoystick.core.designsystem.component.DestinationCardSpec
-import com.locationjoystick.core.designsystem.component.DestinationHub
+import com.locationjoystick.core.designsystem.LjSpacing
+import com.locationjoystick.core.designsystem.component.LjCard
+import com.locationjoystick.core.designsystem.component.LjDivider
 import com.locationjoystick.core.designsystem.component.LjOverflowMenu
 import com.locationjoystick.core.designsystem.component.LjOverflowMenuSectionLabel
 import com.locationjoystick.core.designsystem.component.LjScaffold
+import com.locationjoystick.core.designsystem.component.LjSettingItem
 import com.locationjoystick.core.location.rememberSpoofToggleState
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.feature.settings.impl.R
@@ -713,36 +719,44 @@ private fun SettingsHubScreen(
         },
         floatingActionButton = { SettingsSaveDiscardFab(uiState.isDirty, onAction) },
     ) { paddingValues ->
-        DestinationHub(
-            paddingValues = paddingValues,
-            cards =
-                listOf(
-                    DestinationCardSpec(
-                        icon = LjIcons.Speed,
-                        title = stringResource(R.string.settings_hub_movement_and_gps),
-                        description = stringResource(R.string.settings_hub_movement_and_gps_desc),
-                        onClick = { onNavigate(SettingsSection.GPS) },
-                    ),
-                    DestinationCardSpec(
-                        icon = LjIcons.Joystick,
-                        title = stringResource(R.string.settings_hub_menus),
-                        description = stringResource(R.string.settings_hub_menus_desc),
-                        onClick = { onNavigate(SettingsSection.MENUS) },
-                    ),
-                    DestinationCardSpec(
-                        icon = LjIcons.Favorite,
-                        title = stringResource(R.string.settings_hub_favorites_and_routes),
-                        description = stringResource(R.string.settings_hub_favorites_and_routes_desc),
-                        onClick = { onNavigate(SettingsSection.FAVORITES_ROUTES) },
-                    ),
-                    DestinationCardSpec(
-                        icon = LjIcons.Explore,
-                        title = stringResource(R.string.settings_hub_roaming),
-                        description = stringResource(R.string.settings_hub_roaming_desc),
-                        onClick = { onNavigate(SettingsSection.ROAMING) },
-                    ),
-                ),
-        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(LjSpacing.page),
+        ) {
+            LjCard(modifier = Modifier.fillMaxWidth()) {
+                LjSettingItem(
+                    icon = LjIcons.Speed,
+                    title = stringResource(R.string.settings_hub_movement_and_gps),
+                    subtitle = stringResource(R.string.settings_hub_movement_and_gps_desc),
+                    onClick = { onNavigate(SettingsSection.GPS) },
+                )
+                LjDivider()
+                LjSettingItem(
+                    icon = LjIcons.Joystick,
+                    title = stringResource(R.string.settings_hub_menus),
+                    subtitle = stringResource(R.string.settings_hub_menus_desc),
+                    onClick = { onNavigate(SettingsSection.MENUS) },
+                )
+                LjDivider()
+                LjSettingItem(
+                    icon = LjIcons.Favorite,
+                    title = stringResource(R.string.settings_hub_favorites_and_routes),
+                    subtitle = stringResource(R.string.settings_hub_favorites_and_routes_desc),
+                    onClick = { onNavigate(SettingsSection.FAVORITES_ROUTES) },
+                )
+                LjDivider()
+                LjSettingItem(
+                    icon = LjIcons.Explore,
+                    title = stringResource(R.string.settings_hub_roaming),
+                    subtitle = stringResource(R.string.settings_hub_roaming_desc),
+                    onClick = { onNavigate(SettingsSection.ROAMING) },
+                )
+            }
+        }
     }
 }
 

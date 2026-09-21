@@ -4,50 +4,59 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val LjBg = Color(0xFF1E1E24)
-val LjSurface = Color(0xFF252530)
-val LjSurfaceVariant = Color(0xFF2D2D3A)
-val LjText = Color(0xFFF7EBE8)
-val LjTextSecondary = Color(0xFFB0A8B4)
-val LjAccent = Color(0xFFF79D5C)
-val LjError = Color(0xFFEF4444)
-val LjErrorContainer = Color(0xFF3D1A1A)
-val LjSuccess = Color(0xFF4CAF50)
-val LjInactive = Color(0xFF757575)
-val LjWarning = Color(0xFFF59E0B)
-val LjWarningContainer = Color(0xFF451A03)
+// Dark "deep-space blue" tech palette — the app's primary theme.
+val LjBg = Color(0xFF08111F)
+val LjSurface = Color(0xFF0E192A)
+val LjSurfaceVariant = Color(0xFF111D30)
+val LjCard = Color(0xFF142033)
+val LjText = Color(0xFFF4F7FC)
+val LjTextSecondary = Color(0xFF94A3B8)
+val LjTextWeak = Color(0xFF65758B)
+val LjAccent = Color(0xFF3284FF)
+val LjAccentSoft = Color(0xFF65A5FF)
+val LjAccentContainer = Color(0xFF1A2C47)
+val LjError = Color(0xFFFF647C)
+val LjErrorContainer = Color(0xFF3A1A26)
+val LjSuccess = Color(0xFF3ED6A3)
+val LjSuccessContainer = Color(0xFF14362C)
+val LjInactive = Color(0xFF65758B)
+val LjWarning = Color(0xFFFFB35C)
+val LjWarningContainer = Color(0xFF3A2A17)
+val LjDivider = Color(0x14FFFFFF)
+val LjDividerStrong = Color(0x1AFFFFFF)
 
 // Light theme — high-contrast variant for sunny/outdoor readability.
-val LjLightBg = Color(0xFFFAF7F5)
+val LjLightBg = Color(0xFFF5F8FC)
 val LjLightSurface = Color(0xFFFFFFFF)
-val LjLightSurfaceVariant = Color(0xFFF0E9E4)
-val LjLightText = Color(0xFF231E1B)
-val LjLightTextSecondary = Color(0xFF5C5259)
-val LjLightAccent = Color(0xFFB2531A)
-val LjLightOutlineVariant = Color(0xFFDDD3CB)
+val LjLightSurfaceVariant = Color(0xFFE8EEF6)
+val LjLightText = Color(0xFF15202E)
+val LjLightTextSecondary = Color(0xFF55677C)
+val LjLightAccent = Color(0xFF1F6AE0)
+val LjLightAccentContainer = Color(0xFFDCEAFF)
+val LjLightOutlineVariant = Color(0xFFD3DDE9)
 
 object LjMapColors {
-    val ActiveButton = Color(0xFF43A047)
-    val PositionBlue = Color(0xFF1976D2)
-    val RouteOrange = Color(0xFFFF9800)
+    val ActiveButton = Color(0xFF3ED6A3)
+    val PositionBlue = Color(0xFF3284FF)
+    val RouteLine = Color(0xFF65A5FF)
     val PointStroke = Color(0xFFFFFFFF)
-    val PendingTapGreen = Color(0xFF4CAF50)
+    val PendingTap = Color(0xFF3ED6A3)
 }
 
 val LjDarkColorScheme =
     darkColorScheme(
         primary = LjAccent,
-        onPrimary = LjBg,
-        primaryContainer = Color(0xFF3D2E1E),
-        onPrimaryContainer = LjAccent,
-        secondary = LjAccent,
+        onPrimary = LjText,
+        primaryContainer = LjAccentContainer,
+        onPrimaryContainer = LjAccentSoft,
+        secondary = LjAccentSoft,
         onSecondary = LjBg,
-        secondaryContainer = Color(0xFF3D2E1E),
-        onSecondaryContainer = LjAccent,
-        tertiary = LjAccent,
+        secondaryContainer = LjAccentContainer,
+        onSecondaryContainer = LjAccentSoft,
+        tertiary = LjAccentSoft,
         onTertiary = LjBg,
-        tertiaryContainer = Color(0xFF2A2E3D),
-        onTertiaryContainer = LjAccent,
+        tertiaryContainer = LjSurfaceVariant,
+        onTertiaryContainer = LjAccentSoft,
         error = LjError,
         onError = LjText,
         errorContainer = LjErrorContainer,
@@ -58,39 +67,41 @@ val LjDarkColorScheme =
         onSurface = LjText,
         surfaceVariant = LjSurfaceVariant,
         onSurfaceVariant = LjTextSecondary,
-        outline = LjAccent,
-        outlineVariant = Color(0xFF3A3A48),
+        outline = LjTextWeak,
+        outlineVariant = LjDividerStrong,
         inverseSurface = LjText,
         inverseOnSurface = LjBg,
-        inversePrimary = LjAccent,
-        scrim = Color(0x80000000),
+        inversePrimary = LjLightAccent,
+        scrim = Color(0xB3000000),
     )
 
 val LjLightColorScheme =
     lightColorScheme(
         primary = LjLightAccent,
         onPrimary = Color.White,
-        primaryContainer = Color(0xFFFFE0C2),
+        primaryContainer = LjLightAccentContainer,
         onPrimaryContainer = LjLightAccent,
         secondary = LjLightAccent,
         onSecondary = Color.White,
-        secondaryContainer = Color(0xFFFFE0C2),
+        secondaryContainer = LjLightAccentContainer,
         onSecondaryContainer = LjLightAccent,
         tertiary = LjLightAccent,
         onTertiary = Color.White,
-        tertiaryContainer = Color(0xFFF3E5D8),
+        tertiaryContainer = LjLightSurfaceVariant,
         onTertiaryContainer = LjLightAccent,
         error = LjError,
         onError = Color.White,
-        errorContainer = Color(0xFFFFDAD6),
-        onErrorContainer = LjError,
+        errorContainer = Color(0xFFFFDDE3),
+        onErrorContainer = Color(0xFF9E1B32),
         background = LjLightBg,
         onBackground = LjLightText,
         surface = LjLightSurface,
         onSurface = LjLightText,
         surfaceVariant = LjLightSurfaceVariant,
         onSurfaceVariant = LjLightTextSecondary,
-        outline = LjLightAccent,
+        surfaceContainer = LjLightSurface,
+        surfaceContainerHigh = LjLightSurface,
+        outline = LjLightTextSecondary,
         outlineVariant = LjLightOutlineVariant,
         inverseSurface = LjLightText,
         inverseOnSurface = LjLightBg,

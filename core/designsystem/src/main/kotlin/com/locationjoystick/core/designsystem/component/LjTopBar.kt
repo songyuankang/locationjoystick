@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -87,7 +88,7 @@ fun LjTopBar(
                 }
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -117,43 +118,48 @@ fun LjTopBar(
                             locationLabel != null -> stringResource(R.string.top_bar_start_with_location, locationLabel)
                             else -> stringResource(R.string.common_start)
                         }
-                    Row(
-                        modifier =
-                            Modifier
-                                .defaultMinSize(minHeight = 44.dp)
-                                .semantics {
-                                    contentDescription = spoofToggleCd
-                                }.combinedClickable(
-                                    interactionSource = interactionSource,
-                                    indication = LocalIndication.current,
-                                    onClick = onToggleSpoofing,
-                                    onLongClick = {
-                                        if (!isSpoofing && locationLabel != null) {
-                                            Toast.makeText(context, locationLabel, Toast.LENGTH_SHORT).show()
-                                        }
-                                    },
-                                ).padding(horizontal = LjSpacing.sm, vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Surface(
+                        shape = CircleShape,
+                        color = tint.copy(alpha = 0.14f),
                     ) {
-                        Crossfade(
-                            targetState = isSpoofing,
-                            animationSpec = tween(150),
-                            label = "spoofToggleIcon",
-                        ) { spoofing ->
-                            Icon(
-                                imageVector = if (spoofing) LjIcons.Stop else LjIcons.PlayArrow,
-                                contentDescription = null,
-                                tint = tint,
-                                modifier = Modifier.size(12.dp).padding(end = 3.dp),
+                        Row(
+                            modifier =
+                                Modifier
+                                    .defaultMinSize(minHeight = 36.dp)
+                                    .semantics {
+                                        contentDescription = spoofToggleCd
+                                    }.combinedClickable(
+                                        interactionSource = interactionSource,
+                                        indication = LocalIndication.current,
+                                        onClick = onToggleSpoofing,
+                                        onLongClick = {
+                                            if (!isSpoofing && locationLabel != null) {
+                                                Toast.makeText(context, locationLabel, Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                    ).padding(horizontal = LjSpacing.sm + 4.dp, vertical = LjSpacing.xs),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Crossfade(
+                                targetState = isSpoofing,
+                                animationSpec = tween(150),
+                                label = "spoofToggleIcon",
+                            ) { spoofing ->
+                                Icon(
+                                    imageVector = if (spoofing) LjIcons.Stop else LjIcons.PlayArrow,
+                                    contentDescription = null,
+                                    tint = tint,
+                                    modifier = Modifier.size(14.dp).padding(end = 4.dp),
+                                )
+                            }
+                            Text(
+                                text = spoofToggleLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = tint,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        Text(
-                            text = spoofToggleLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = tint,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
                     }
                 }
             }

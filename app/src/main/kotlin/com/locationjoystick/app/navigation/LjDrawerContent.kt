@@ -1,28 +1,26 @@
 package com.locationjoystick.app.navigation
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -31,7 +29,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.locationjoystick.app.IDLE_ROUTE
 import com.locationjoystick.app.R
+import com.locationjoystick.core.common.constants.AppConstants
 import com.locationjoystick.core.designsystem.LjIcons
+import com.locationjoystick.core.designsystem.LjSpacing
+import com.locationjoystick.core.designsystem.component.AppIcon
 import com.locationjoystick.feature.favorites.api.FAVORITES_ROUTE
 import com.locationjoystick.feature.favorites.api.MAP_PICKER_ROUTE
 import com.locationjoystick.feature.group.api.GROUP_ROUTE
@@ -45,12 +46,23 @@ fun LjDrawerContent(
     navController: NavHostController,
     drawerState: DrawerState,
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    ModalDrawerSheet(modifier = Modifier.widthIn(max = 320.dp).semantics { testTag = "nav_drawer" }) {
+    val itemColors =
+        NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+        )
+
+    ModalDrawerSheet(
+        modifier = Modifier.widthIn(max = 320.dp).semantics { testTag = "nav_drawer" },
+        drawerContainerColor = MaterialTheme.colorScheme.surface,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.End,
@@ -59,10 +71,33 @@ fun LjDrawerContent(
                 Icon(LjIcons.Close, contentDescription = stringResource(R.string.drawer_close_menu_cd))
             }
         }
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = LjSpacing.page, vertical = LjSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(LjSpacing.sm + 4.dp),
+        ) {
+            AppIcon(size = 44.dp)
+            Column {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = stringResource(R.string.drawer_version, AppConstants.AppInfo.VERSION_NAME),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         NavigationDrawerItem(
             icon = { Icon(LjIcons.Home, stringResource(R.string.drawer_home_cd)) },
             label = { Text(stringResource(R.string.drawer_home)) },
+            colors = itemColors,
             selected = currentRoute == IDLE_ROUTE,
             onClick = {
                 navController.navigate(IDLE_ROUTE) {
@@ -75,6 +110,7 @@ fun LjDrawerContent(
         NavigationDrawerItem(
             icon = { Icon(LjIcons.LocationOn, stringResource(R.string.drawer_map_cd)) },
             label = { Text(stringResource(R.string.drawer_map)) },
+            colors = itemColors,
             selected = currentRoute == MAP_ROUTE,
             onClick = {
                 navController.navigate(MAP_ROUTE) {
@@ -88,6 +124,7 @@ fun LjDrawerContent(
         NavigationDrawerItem(
             icon = { Icon(LjIcons.Route, stringResource(R.string.drawer_routes_cd)) },
             label = { Text(stringResource(R.string.drawer_routes)) },
+            colors = itemColors,
             selected = currentRoute != null && (currentRoute == ROUTES_ROUTE || currentRoute.startsWith("route_")),
             onClick = {
                 navController.navigate(ROUTES_ROUTE) {
@@ -101,6 +138,7 @@ fun LjDrawerContent(
         NavigationDrawerItem(
             icon = { Icon(LjIcons.Favorite, stringResource(R.string.drawer_favorites_cd)) },
             label = { Text(stringResource(R.string.drawer_favorites)) },
+            colors = itemColors,
             selected = currentRoute == FAVORITES_ROUTE || currentRoute == MAP_PICKER_ROUTE,
             onClick = {
                 navController.navigate(FAVORITES_ROUTE) {
@@ -114,6 +152,7 @@ fun LjDrawerContent(
         NavigationDrawerItem(
             icon = { Icon(LjIcons.Share, stringResource(R.string.drawer_group_sync_cd)) },
             label = { Text(stringResource(R.string.drawer_group_sync)) },
+            colors = itemColors,
             selected = currentRoute == GROUP_ROUTE,
             onClick = {
                 navController.navigate(GROUP_ROUTE) {
@@ -127,6 +166,7 @@ fun LjDrawerContent(
         NavigationDrawerItem(
             icon = { Icon(LjIcons.Settings, stringResource(R.string.drawer_settings_cd)) },
             label = { Text(stringResource(R.string.drawer_settings)) },
+            colors = itemColors,
             selected = currentRoute == SETTINGS_ROUTE,
             onClick = {
                 navController.navigate(SETTINGS_ROUTE) {
@@ -134,44 +174,6 @@ fun LjDrawerContent(
                     launchSingleTop = true
                     restoreState = true
                 }
-                scope.launch { drawerState.close() }
-            },
-        )
-        NavigationDrawerItem(
-            icon = { Icon(LjIcons.Explore, stringResource(R.string.drawer_website_cd)) },
-            label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.drawer_website))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = LjIcons.OpenInNew,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
-            },
-            selected = false,
-            onClick = {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://locationjoystick.shrtcts.fr/")))
-                scope.launch { drawerState.close() }
-            },
-        )
-        NavigationDrawerItem(
-            icon = { Icon(LjIcons.Forum, stringResource(R.string.drawer_discord_cd)) },
-            label = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.drawer_discord))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = LjIcons.OpenInNew,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
-            },
-            selected = false,
-            onClick = {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/r9DRnkwbMf")))
                 scope.launch { drawerState.close() }
             },
         )

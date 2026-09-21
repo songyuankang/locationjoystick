@@ -392,11 +392,11 @@ internal fun MapScreen(
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 16.dp)
                             .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
                                 MaterialTheme.shapes.small,
-                            ).padding(horizontal = 10.dp, vertical = 4.dp),
+                            ).padding(horizontal = 14.dp, vertical = 6.dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

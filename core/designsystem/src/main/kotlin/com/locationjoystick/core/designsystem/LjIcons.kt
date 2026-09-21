@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.DirectionsBike
 import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
 import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.Add
@@ -56,12 +57,14 @@ import androidx.compose.material.icons.rounded.Terrain
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.Warning
 
 object LjIcons {
     val Add = Icons.Rounded.Add
     val ArrowBack = Icons.AutoMirrored.Rounded.ArrowBack
     val ArrowDropDown = Icons.Rounded.ArrowDropDown
     val Check = Icons.Rounded.Check
+    val ChevronRight = Icons.AutoMirrored.Rounded.KeyboardArrowRight
     val CheckCircle = Icons.Rounded.CheckCircle
     val Close = Icons.Rounded.Close
     val Delete = Icons.Rounded.Delete
@@ -113,4 +116,5 @@ object LjIcons {
     val Undo = Icons.AutoMirrored.Rounded.Undo
     val WhatsNew = Icons.Rounded.NewReleases
     val Visibility = Icons.Rounded.Visibility
+    val Warning = Icons.Rounded.Warning
 }

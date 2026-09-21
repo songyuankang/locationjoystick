@@ -66,4 +66,12 @@ class WhatsNewRepositoryTest {
             val result = repository.fetchEntries("1.0.0")
             assertNull(result)
         }
+
+    @Test
+    fun `fetchEntries returns null when baseUrl is blank`() =
+        runTest {
+            repository.baseUrl = ""
+            val result = repository.fetchEntries("1.0.0")
+            assertNull(result)
+        }
 }

@@ -2,6 +2,7 @@ package com.locationjoystick.core.designsystem.component
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,8 @@ fun LjMapIconButton(
             onClick = onClick,
             shape = CircleShape,
             color = containerColor,
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)),
+            shadowElevation = 4.dp,
             interactionSource = interactionSource,
             modifier = Modifier.size(UiConstants.FAB_CONTAINER_SIZE).scale(scale),
         ) {
@@ -63,7 +66,7 @@ private fun LjMapIconButtonPreview() {
     LjMapIconButton(
         icon = LjIcons.MyLocation,
         contentDescription = "My location",
-        containerColor = Color(0xFF1976D2),
+        containerColor = Color(0xFF3284FF),
         contentColor = Color.White,
         onClick = {},
     )

@@ -67,8 +67,8 @@ val LjTypography =
         titleMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 0.15.sp,
             ),
@@ -100,9 +100,9 @@ val LjTypography =
             TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                letterSpacing = 0.4.sp,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                letterSpacing = 0.3.sp,
             ),
         labelLarge =
             TextStyle(

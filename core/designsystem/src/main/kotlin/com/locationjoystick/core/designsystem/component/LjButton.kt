@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import com.locationjoystick.core.designsystem.LjAccent
-import com.locationjoystick.core.designsystem.LjBg
 import com.locationjoystick.core.designsystem.LjSpacing
 import com.locationjoystick.core.designsystem.LjText
 
@@ -133,7 +132,7 @@ fun <T> LjSegmentedControl(
                 label = "segmentedControlContainerColor",
             )
             val contentColor by animateColorAsState(
-                targetValue = if (isSelected) LjBg else LjText,
+                targetValue = LjText,
                 animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                 label = "segmentedControlContentColor",
             )

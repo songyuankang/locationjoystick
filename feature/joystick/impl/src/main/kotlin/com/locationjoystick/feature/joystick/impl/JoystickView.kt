@@ -14,6 +14,7 @@ import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.compose.ui.graphics.toArgb
 import com.locationjoystick.core.designsystem.LjAccent
+import com.locationjoystick.core.designsystem.LjAccentSoft
 import kotlin.math.atan2
 import kotlin.math.hypot
 import kotlin.math.min
@@ -72,56 +73,76 @@ class JoystickView
         var onDragHandleDown: ((rawX: Float, rawY: Float) -> Unit)? = null
 
         private val accentArgb = LjAccent.toArgb()
+        private val accentSoftArgb = LjAccentSoft.toArgb()
+        private val baseSurfaceArgb = Color.rgb(0x0E, 0x19, 0x2A)
+        private val borderBlueArgb = Color.rgb(0x65, 0xA5, 0xFF)
+        private val arrowGreyArgb = Color.rgb(0x94, 0xA3, 0xB8)
 
         private val outerPaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                alpha = OUTER_ALPHA
+                color = baseSurfaceArgb
+                alpha = OUTER_ALPHA + 70
                 style = Paint.Style.FILL
             }
 
         private val outerBorderPaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                alpha = 160
+                color = borderBlueArgb
+                alpha = 110
                 style = Paint.Style.STROKE
-                strokeWidth = 4f
+                strokeWidth = 3f
             }
 
         private fun updateLockedAppearance() {
             if (isLocked) {
                 outerPaint.color = accentArgb
                 outerPaint.alpha = 180
-                outerBorderPaint.color = accentArgb
-                outerBorderPaint.alpha = 220
+                outerBorderPaint.color = accentSoftArgb
+                outerBorderPaint.alpha = 255
             } else {
-                outerPaint.color = Color.WHITE
-                outerPaint.alpha = OUTER_ALPHA
-                outerBorderPaint.color = Color.WHITE
-                outerBorderPaint.alpha = 160
+                outerPaint.color = baseSurfaceArgb
+                outerPaint.alpha = OUTER_ALPHA + 70
+                outerBorderPaint.color = borderBlueArgb
+                outerBorderPaint.alpha = 110
             }
         }
 
         private val knobPaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = accentArgb
+                alpha = 255
+                style = Paint.Style.FILL
+            }
+
+        private val knobBorderPaint =
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.WHITE
                 alpha = 220
+                style = Paint.Style.STROKE
+                strokeWidth = 2.5f
+            }
+
+        /** Direction tick marks (N/E/S/W) inside the outer ring. */
+        private val arrowPaint =
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = arrowGreyArgb
+                alpha = 170
                 style = Paint.Style.FILL
             }
 
         /** Background circle for the drag handle. */
         private val handleBgPaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE
-                alpha = 180
+                color = baseSurfaceArgb
+                alpha = 210
                 style = Paint.Style.FILL
             }
 
         /** Grip lines drawn inside the drag handle. */
         private val handleLinePaint =
             Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.DKGRAY
-                alpha = 200
+                color = arrowGreyArgb
+                alpha = 220
                 style = Paint.Style.STROKE
                 strokeWidth = 2.5f
                 strokeCap = Paint.Cap.ROUND

@@ -84,7 +84,9 @@ fun WhatsNewPopup(modifier: Modifier = Modifier) {
             onDismiss = { showModal = false },
             onViewFullChangelog = {
                 showModal = false
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.CHANGELOG_URL)))
+                if (AppConstants.AppInfo.CHANGELOG_URL.isNotBlank()) {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(AppConstants.AppInfo.CHANGELOG_URL)))
+                }
             },
         )
     }
@@ -151,6 +153,8 @@ private fun WhatsNewDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.large,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         title = {
             Text(
                 stringResource(
@@ -207,10 +211,13 @@ private fun WhatsNewDialog(
                 Text(stringResource(R.string.whats_new_got_it))
             }
         },
-        dismissButton = {
-            TextButton(onClick = onViewFullChangelog) {
-                Text(stringResource(R.string.whats_new_view_full_changelog))
-            }
-        },
+        dismissButton =
+            if (AppConstants.AppInfo.CHANGELOG_URL.isNotBlank()) {
+                {
+                    TextButton(onClick = onViewFullChangelog) {
+                        Text(stringResource(R.string.whats_new_view_full_changelog))
+                    }
+                }
+            } else null,
     )
 }

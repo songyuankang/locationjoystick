@@ -19,17 +19,17 @@ class MapColorContractTest {
 
     @Test
     fun `current position is blue not orange`() {
-        assertNotEquals(LjMapColors.PositionBlue, LjMapColors.RouteOrange)
+        assertNotEquals(LjMapColors.PositionBlue, LjMapColors.RouteLine)
     }
 
     @Test
-    fun `route orange is FF9800`() {
-        assertEquals(Color(0xFFFF9800), LjMapColors.RouteOrange)
+    fun `route line is 65A5FF`() {
+        assertEquals(Color(0xFF65A5FF), LjMapColors.RouteLine)
     }
 
     @Test
-    fun `position blue is 1976D2`() {
-        assertEquals(Color(0xFF1976D2), LjMapColors.PositionBlue)
+    fun `position blue is 3284FF`() {
+        assertEquals(Color(0xFF3284FF), LjMapColors.PositionBlue)
     }
 
     @Test

@@ -1,7 +1,7 @@
 [versions]
 # Kotlin & Android
 kotlin = "2.2.21"
-agp = "9.4.0"
+agp = "9.4.1"
 ksp = "2.3.6"
 
 # AndroidX Core
@@ -50,7 +50,7 @@ kover = "0.9.9"
 
 # Lint / format
 ktlint-gradle = "14.2.0"
-lint-tools = "32.4.0"
+lint-tools = "32.4.1"
 
 # Testing
 junit = "4.13.2"

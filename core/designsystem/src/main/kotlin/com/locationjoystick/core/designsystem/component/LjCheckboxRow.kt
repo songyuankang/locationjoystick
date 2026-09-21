@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,10 +38,9 @@ fun LjCheckboxRow(
             modifier
                 .fillMaxWidth()
                 .clickable(enabled = enabled) { onCheckedChange(!checked) }
-                .padding(vertical = LjSpacing.xs),
+                .padding(vertical = LjSpacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -53,11 +53,12 @@ fun LjCheckboxRow(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     },
             )
-            Spacer(modifier = Modifier.width(LjSpacing.xs))
+            Spacer(modifier = Modifier.width(LjSpacing.sm))
         }
-        Column(modifier = Modifier.padding(start = LjSpacing.sm)) {
+        Column(modifier = Modifier.weight(1f).padding(end = LjSpacing.sm)) {
             Text(
                 text = title,
+                style = MaterialTheme.typography.bodyLarge,
                 color =
                     if (enabled) {
                         textColor
@@ -73,5 +74,18 @@ fun LjCheckboxRow(
                 )
             }
         }
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            enabled = enabled,
+            colors =
+                SwitchDefaults.colors(
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    uncheckedBorderColor = Color.Transparent,
+                ),
+        )
     }
 }

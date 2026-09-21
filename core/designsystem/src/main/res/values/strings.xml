@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="destination_card_locationjoystick">"locationjoystick"</string>
+    <string name="destination_card_locationjoystick">"coco"</string>
     <string name="destination_card_version">"v%1$s"</string>
     <string name="favorite_target_detail_set_location">"Set location"</string>
     <string name="favorite_target_detail_walk_to_location">"Walk to location"</string>

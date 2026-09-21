@@ -174,7 +174,11 @@ internal fun RoutesScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddOptionsSheet = true }) {
+            FloatingActionButton(
+                onClick = { showAddOptionsSheet = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ) {
                 Icon(LjIcons.Add, contentDescription = stringResource(R.string.routes_screen_add_route_cd))
             }
         },
@@ -413,6 +417,7 @@ private fun RouteCard(
         Text(
             "${route.waypoints.size} waypoints",
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 
