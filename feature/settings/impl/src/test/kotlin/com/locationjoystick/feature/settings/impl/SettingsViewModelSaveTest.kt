@@ -7,6 +7,7 @@ import com.locationjoystick.core.common.util.NsdCodeManager
 import com.locationjoystick.core.data.FavoriteRepository
 import com.locationjoystick.core.data.RouteRepository
 import com.locationjoystick.core.data.SettingsRepository
+import com.locationjoystick.core.data.TeleportUseCase
 import com.locationjoystick.core.datastore.AppPreferencesDataSource
 import com.locationjoystick.core.datastore.PreferencesDataSource
 import com.locationjoystick.core.datastore.SettingsSnapshot
@@ -17,6 +18,7 @@ import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.AppSettings
 import com.locationjoystick.core.model.ExportData
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.model.Route
@@ -24,6 +26,7 @@ import com.locationjoystick.core.model.SpeedProfile
 import com.locationjoystick.core.model.SpeedUnit
 import com.locationjoystick.core.testing.FakeFavoriteDao
 import com.locationjoystick.core.testing.FakeRouteDao
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +80,7 @@ class SettingsViewModelSaveTest {
                 exportSyncClient = ExportSyncClient(),
                 nsdCodeManager = NsdCodeManager(context),
                 compassHeadingSource = CompassHeadingSource(),
+                teleportUseCase = TeleportUseCase(context, fakeSettingsRepo),
                 context = context,
             )
     }
@@ -557,6 +561,14 @@ internal class SaveTestPreferencesDataSource : PreferencesDataSource {
     override fun getMapFollowsLocation(): Flow<Boolean> = flowOf(true)
 
     override suspend fun setMapFollowsLocation(enabled: Boolean) = Unit
+
+    private val mapTileSourceFlow = MutableStateFlow(MapTileSource.OSM)
+
+    override fun getMapTileSource(): Flow<MapTileSource> = mapTileSourceFlow
+
+    override suspend fun setMapTileSource(source: MapTileSource) {
+        mapTileSourceFlow.value = source
+    }
 
     override fun getRealismBearingHoldIdle(): Flow<Boolean> = flowOf(true)
 

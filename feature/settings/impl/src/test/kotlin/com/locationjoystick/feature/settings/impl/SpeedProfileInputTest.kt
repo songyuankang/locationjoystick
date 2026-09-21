@@ -7,6 +7,7 @@ import com.locationjoystick.core.common.util.NsdCodeManager
 import com.locationjoystick.core.data.FavoriteRepository
 import com.locationjoystick.core.data.RouteRepository
 import com.locationjoystick.core.data.SettingsRepository
+import com.locationjoystick.core.data.TeleportUseCase
 import com.locationjoystick.core.location.CompassHeadingSource
 import com.locationjoystick.core.model.SpeedUnit
 import com.locationjoystick.core.testing.FakeFavoriteDao
@@ -47,9 +48,10 @@ class SpeedProfileInputTest {
         Dispatchers.setMain(testDispatcher)
         val context = RuntimeEnvironment.getApplication()
         fakeDataSource = SaveTestPreferencesDataSource()
+        val settingsRepo = SettingsRepository(fakeDataSource)
         viewModel =
             SettingsViewModel(
-                settingsRepository = SettingsRepository(fakeDataSource),
+                settingsRepository = settingsRepo,
                 favoriteRepository = FavoriteRepository(FakeFavoriteDao()),
                 routeRepository = RouteRepository(routeDao = FakeRouteDao(), context = context),
                 sensorPermissionBootstrap = SensorPermissionBootstrap(context),
@@ -58,6 +60,7 @@ class SpeedProfileInputTest {
                 exportSyncClient = ExportSyncClient(),
                 nsdCodeManager = NsdCodeManager(context),
                 compassHeadingSource = CompassHeadingSource(),
+                teleportUseCase = TeleportUseCase(context, settingsRepo),
                 context = context,
             )
     }

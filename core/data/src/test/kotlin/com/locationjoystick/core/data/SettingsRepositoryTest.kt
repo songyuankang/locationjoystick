@@ -9,6 +9,7 @@ import com.locationjoystick.core.datastore.SpeedProfilePreferences
 import com.locationjoystick.core.datastore.toAppFeature
 import com.locationjoystick.core.model.AppFeature
 import com.locationjoystick.core.model.LatLng
+import com.locationjoystick.core.model.MapTileSource
 import com.locationjoystick.core.model.RecentSearch
 import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.model.SpeedUnit
@@ -1282,6 +1283,14 @@ class FakeAppPreferencesDataSource : PreferencesDataSource {
         MutableStateFlow(AppConstants.RealismConstants.SATELLITE_EXTRAS_ENABLED_DEFAULT)
     private val realismSuspendedMockingEnabledFlow =
         MutableStateFlow(AppConstants.RealismConstants.SUSPENDED_MOCKING_ENABLED_DEFAULT)
+
+    private val mapTileSourceFlow = MutableStateFlow(MapTileSource.OSM)
+
+    override fun getMapTileSource(): Flow<MapTileSource> = mapTileSourceFlow
+
+    override suspend fun setMapTileSource(source: MapTileSource) {
+        mapTileSourceFlow.value = source
+    }
 
     override fun getRealismBearingHoldIdle(): Flow<Boolean> = realismBearingHoldIdleFlow
 
