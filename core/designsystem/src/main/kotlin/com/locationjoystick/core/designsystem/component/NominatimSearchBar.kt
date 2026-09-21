@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
@@ -29,8 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.locationjoystick.core.common.constants.AppConstants
@@ -58,6 +62,7 @@ fun NominatimSearchBar(
     var query by remember { mutableStateOf("") }
     var results by remember { mutableStateOf<List<NominatimResult>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(query) {
         val rawCoords = parseRawLatLng(query)
@@ -82,9 +87,9 @@ fun NominatimSearchBar(
         withContext(Dispatchers.IO) {
             try {
                 val encoded = URLEncoder.encode(query, "UTF-8")
-                val url = URL("${AppConstants.NominatimConstants.SEARCH_URL}?q=$encoded&format=json&limit=5")
+                val url = URL("${AppConstants.NominatimConstants.SEARCH_URL}?q=$encoded&format=json&limit=5&accept-language=zh-CN,zh;q=0.9,en;q=0.8")
                 val conn = url.openConnection() as HttpURLConnection
-                conn.setRequestProperty("User-Agent", "locationjoystick/1.0")
+                conn.setRequestProperty("User-Agent", "coco/1.0 (com.locationjoystick.app)")
                 conn.connectTimeout = AppConstants.NominatimConstants.CONNECT_TIMEOUT_MS
                 conn.readTimeout = AppConstants.NominatimConstants.READ_TIMEOUT_MS
                 try {
@@ -136,6 +141,13 @@ fun NominatimSearchBar(
             placeholder = { Text(stringResource(R.string.search_bar_search_location)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions =
+                KeyboardActions(
+                    onSearch = {
+                        keyboardController?.hide()
+                    },
+                ),
             shape =
                 if (showResults) {
                     RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
@@ -160,6 +172,7 @@ fun NominatimSearchBar(
                             Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    keyboardController?.hide()
                                     onLocationSelected(recent.lat, recent.lon, recent.displayName)
                                     onSearchCommitted?.invoke(recent.displayName, recent.lat, recent.lon)
                                     query = ""
@@ -205,6 +218,7 @@ fun NominatimSearchBar(
                         Modifier
                             .fillMaxWidth()
                             .clickable(role = Role.Button) {
+                                keyboardController?.hide()
                                 onLocationSelected(result.lat, result.lon, result.displayName)
                                 onSearchCommitted?.invoke(result.displayName, result.lat, result.lon)
                                 query = ""
