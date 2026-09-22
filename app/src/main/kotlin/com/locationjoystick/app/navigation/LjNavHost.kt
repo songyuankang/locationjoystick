@@ -26,6 +26,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.locationjoystick.app.IDLE_ROUTE
 import com.locationjoystick.app.IdleScreen
+import com.locationjoystick.app.license.LicenseScreen
+import com.locationjoystick.app.license.LicenseViewModel
+import com.locationjoystick.license.LicenseStatus
 import com.locationjoystick.core.common.util.isMockLocationEnabled
 import com.locationjoystick.core.common.util.isOverlayPermissionGranted
 import com.locationjoystick.feature.favorites.api.FAVORITES_ROUTE
@@ -95,6 +98,17 @@ fun LjNavHost(
     onOpenDrawer: () -> Unit,
 ) {
     val context = LocalContext.current
+    val licenseViewModel: LicenseViewModel = hiltViewModel()
+    val licenseState by licenseViewModel.licenseState.collectAsStateWithLifecycle()
+
+    if (licenseState.status != LicenseStatus.ACTIVE) {
+        LicenseScreen(
+            licenseManager = licenseViewModel.licenseManager,
+            licenseState = licenseState,
+            onActivationSuccess = { },
+        )
+        return
+    }
     // Default false for the first frame — the DataStore-backed value below settles a moment
     // later and, if it flips this decision, corrects it via the LaunchedEffect below.
     val startDestination =
