@@ -40,6 +40,7 @@ import com.locationjoystick.core.routing.OsrmClient
 import com.locationjoystick.core.routing.RouteReplayEngine
 import com.locationjoystick.core.routing.RoutingErrorReporter
 import com.locationjoystick.core.routing.TeleportRouteEngine
+import com.locationjoystick.license.LicenseStorage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -133,6 +134,8 @@ class MockLocationService : Service() {
     @Inject lateinit var groupNsdManager: NsdCodeManager
 
     @Inject lateinit var elevationRepository: ElevationRepository
+
+    @Inject lateinit var licenseStorage: LicenseStorage
 
     private val notificationManager: android.app.NotificationManager by lazy {
         getSystemService(android.app.NotificationManager::class.java)
@@ -425,6 +428,13 @@ class MockLocationService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
+        if (licenseStorage.getLicenseKey().isNullOrEmpty()) {
+            Log.e(TAG, "License authorization missing — stopping MockLocationService.")
+            stopSpoofing()
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         if (!hasLocationPermission()) {
             if (BuildConfig.DEBUG) {
                 // In debug builds, allow the service to start without location permission so

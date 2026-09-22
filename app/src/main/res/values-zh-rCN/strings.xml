@@ -46,4 +46,17 @@
     <string name="whats_new_got_it">"知道了"</string>
     <string name="whats_new_view_full_changelog">"查看完整更新日志"</string>
     <string name="whats_new_popup_cd">"本版本的更新内容"</string>
+    <string name="license_screen_title">软件授权验证</string>
+    <string name="license_input_prompt">请输入授权卡密</string>
+    <string name="license_input_subprompt">首次使用需输入卡密绑定激活当前设备，一卡绑定一台设备</string>
+    <string name="license_key_label">授权卡密 (License Key)</string>
+    <string name="license_key_placeholder">例如: A1B2-C3D4-E5F6-G7H8</string>
+    <string name="license_verifying_text">正在连接服务器验证卡密&#8230;</string>
+    <string name="license_activated_success">✅ 激活成功，正在进入&#8230;</string>
+    <string name="license_activate_btn">激活授权</string>
+    <string name="license_verifying_btn">正在验证&#8230;</string>
+    <string name="license_fingerprint_label">设备码: %1$s</string>
+    <string name="license_copy_fingerprint_cd">复制设备码</string>
+    <string name="license_fingerprint_copied_toast">设备码已复制到剪贴板</string>
+    <string name="license_activation_success_toast">激活授权成功！</string>
 </resources>

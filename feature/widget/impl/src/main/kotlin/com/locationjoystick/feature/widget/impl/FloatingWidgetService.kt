@@ -39,6 +39,7 @@ import com.locationjoystick.core.model.RoamingDefaults
 import com.locationjoystick.core.overlay.OverlayService
 import com.locationjoystick.core.overlay.OverlayServiceHelper
 import com.locationjoystick.feature.joystick.impl.JoystickOverlayService
+import com.locationjoystick.license.LicenseStorage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -102,6 +103,8 @@ class FloatingWidgetService :
     @Inject lateinit var locationRepository: LocationRepository
 
     @Inject lateinit var settingsRepository: SettingsRepository
+
+    @Inject lateinit var licenseStorage: LicenseStorage
 
     @Inject lateinit var mapController: MapController
 
@@ -234,6 +237,11 @@ class FloatingWidgetService :
         flags: Int,
         startId: Int,
     ): Int {
+        if (licenseStorage.getLicenseKey().isNullOrEmpty()) {
+            Log.e(TAG, "License authorization missing — stopping FloatingWidgetService.")
+            stopSelf()
+            return START_NOT_STICKY
+        }
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         return super.onStartCommand(intent, flags, startId)
     }

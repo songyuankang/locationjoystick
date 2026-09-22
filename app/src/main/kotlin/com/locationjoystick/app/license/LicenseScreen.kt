@@ -1,6 +1,7 @@
 package com.locationjoystick.app.license
 
-import android.annotation.SuppressLint
+import androidx.compose.ui.res.stringResource
+import com.locationjoystick.app.R
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +54,6 @@ import com.locationjoystick.license.LicenseState
 import com.locationjoystick.license.LicenseStatus
 import kotlinx.coroutines.launch
 
-@SuppressLint("HardcodedComposeString")
 @Composable
 fun LicenseScreen(
     licenseManager: LicenseManager,
@@ -65,9 +65,10 @@ fun LicenseScreen(
     val spoofToggle = rememberSpoofToggleState()
     var inputKey by remember { mutableStateOf("") }
     val isChecking = licenseState.status == LicenseStatus.CHECKING
+    val successToastMsg = stringResource(R.string.license_activation_success_toast)
 
     LjScaffold(
-        title = "软件授权验证",
+        title = stringResource(R.string.license_screen_title),
         isSpoofing = spoofToggle.isSpoofing,
         onToggleSpoofing = spoofToggle.onToggle,
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -100,21 +101,21 @@ fun LicenseScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Lock",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(32.dp),
                         )
                     }
 
                     Text(
-                        text = "请输入授权卡密",
+                        text = stringResource(R.string.license_input_prompt),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     Text(
-                        text = "首次使用需输入卡密绑定激活当前设备，一卡绑定一台设备",
+                        text = stringResource(R.string.license_input_subprompt),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -125,8 +126,8 @@ fun LicenseScreen(
                     OutlinedTextField(
                         value = inputKey,
                         onValueChange = { inputKey = it.trim() },
-                        label = { Text("授权卡密 (License Key)") },
-                        placeholder = { Text("例如: A1B2-C3D4-E5F6-G7H8") },
+                        label = { Text(stringResource(R.string.license_key_label)) },
+                        placeholder = { Text(stringResource(R.string.license_key_placeholder)) },
                         singleLine = true,
                         leadingIcon = {
                             Icon(Icons.Default.Key, contentDescription = null)
@@ -138,7 +139,7 @@ fun LicenseScreen(
                                     scope.launch {
                                         val ok = licenseManager.activateLicense(inputKey)
                                         if (ok) {
-                                            Toast.makeText(context, "激活授权成功！", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, successToastMsg, Toast.LENGTH_SHORT).show()
                                             onActivationSuccess()
                                         }
                                     }
@@ -157,7 +158,7 @@ fun LicenseScreen(
                         ) {
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             Text(
-                                text = "正在连接服务器验证卡密...",
+                                text = stringResource(R.string.license_verifying_text),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.primary,
                             )
@@ -171,7 +172,7 @@ fun LicenseScreen(
                         )
                     } else if (licenseState.status == LicenseStatus.ACTIVE) {
                         Text(
-                            text = "✅ 激活成功，正在进入...",
+                            text = stringResource(R.string.license_activated_success),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
@@ -181,14 +182,15 @@ fun LicenseScreen(
                     Spacer(modifier = Modifier.height(LjSpacing.xs))
 
                     // Activate Button
+                    val activeBtnText = if (isChecking) stringResource(R.string.license_verifying_btn) else stringResource(R.string.license_activate_btn)
                     LjPrimaryButton(
-                        text = if (isChecking) "正在验证..." else "激活授权",
+                        text = activeBtnText,
                         enabled = inputKey.isNotBlank() && !isChecking,
                         onClick = {
                             scope.launch {
                                 val ok = licenseManager.activateLicense(inputKey)
                                 if (ok) {
-                                    Toast.makeText(context, "激活授权成功！", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, successToastMsg, Toast.LENGTH_SHORT).show()
                                     onActivationSuccess()
                                 }
                             }
@@ -205,20 +207,21 @@ fun LicenseScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            text = "设备码: ${DeviceFingerprint.getMaskedFingerprint(licenseState.fingerprint)}",
+                            text = stringResource(R.string.license_fingerprint_label, DeviceFingerprint.getMaskedFingerprint(licenseState.fingerprint)),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
+                        val copyToastMsg = stringResource(R.string.license_fingerprint_copied_toast)
                         IconButton(
                             onClick = {
                                 DeviceFingerprint.copyToClipboard(context, licenseState.fingerprint)
-                                Toast.makeText(context, "设备码已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, copyToastMsg, Toast.LENGTH_SHORT).show()
                             },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ContentCopy,
-                                contentDescription = "复制设备码",
+                                contentDescription = stringResource(R.string.license_copy_fingerprint_cd),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),
                             )

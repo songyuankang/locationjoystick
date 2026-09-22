@@ -46,4 +46,17 @@
     <string name="whats_new_got_it">"Got it"</string>
     <string name="whats_new_view_full_changelog">"View full changelog"</string>
     <string name="whats_new_popup_cd">"What's new in this version"</string>
+    <string name="license_screen_title">Software License Verification</string>
+    <string name="license_input_prompt">Enter License Key</string>
+    <string name="license_input_subprompt">First-time use requires entering a license key to activate this device. One license binds one device.</string>
+    <string name="license_key_label">License Key</string>
+    <string name="license_key_placeholder">e.g. A1B2-C3D4-E5F6-G7H8</string>
+    <string name="license_verifying_text">Connecting to server to verify license&#8230;</string>
+    <string name="license_activated_success">✅ License activated, proceeding...</string>
+    <string name="license_activate_btn">Activate License</string>
+    <string name="license_verifying_btn">Verifying...</string>
+    <string name="license_fingerprint_label">Device Code: %1$s</string>
+    <string name="license_copy_fingerprint_cd">Copy Device Code</string>
+    <string name="license_fingerprint_copied_toast">Device code copied to clipboard</string>
+    <string name="license_activation_success_toast">License activated successfully!</string>
 </resources>
